@@ -1,9 +1,11 @@
 import "./App.css";
+import React from "react";
+import Home from "./components/Home";
 
 function App() {
   return (
     <div className="App">
-      <p>Welcome to Yada</p>
+      <Home />
     </div>
   );
 }
