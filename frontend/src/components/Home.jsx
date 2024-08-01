@@ -1,23 +1,27 @@
 import React, { useState } from "react";
 
 const Home = () => {
-  const [input, setInput] = useState("");
+  const [file, setFile] = useState(null);
   const [flashcards, setFlashcards] = useState([]);
 
-  const handleChange = (event) => {
-    setInput(event.target.value);
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
   };
 
-  const handleSubmit = () => {
-    // this function will eventually send text input to the backend for processing
-    // these are placeholder questions for now
-    const generatedFlashcards = [
-      { question: "What is the capital of France?", answer: "Paris" },
-      { question: "What is 2 + 2?", answer: "4" },
-      { question: "What is the color of the sky?", answer: "Blue" },
-    ];
-    setFlashcards(generatedFlashcards);
-    setInput(""); // Clear the input field after use
+  const handleSubmit = async () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("pdf", file);
+
+    const response = await fetch("/generate-flashcards", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    setFlashcards(data.flashcards);
+    setFile(null);
   };
 
   const handleCardClick = (index) => {
@@ -31,37 +35,45 @@ const Home = () => {
   };
 
   return (
-    <div className="homepage">
-      <h1 className="heading">Welcome to YADA</h1>
-      <textarea
-        className="text-input"
-        value={input}
-        onChange={handleChange}
-        placeholder="Enter your notes or course material here..."
-      />
-      <button className="enter-button" onClick={handleSubmit}>
-        Enter
-      </button>
-      <div className="flashcard-container">
-        {flashcards.map((flashcard, index) => (
-          <div
-            key={index}
-            className="flashcard"
-            onClick={() => handleCardClick(index)}
-          >
-            <p>
-              {flashcard.showAnswer ? (
-                <>
-                  <strong>Answer:</strong> {flashcard.answer}
-                </>
-              ) : (
-                <>
-                  <strong>Question:</strong> {flashcard.question}
-                </>
-              )}
-            </p>
-          </div>
-        ))}
+    <div className="main">
+      <div className="homepage">
+        <h1 className="heading">Welcome to YADA</h1>
+        <div className="input-box">
+          <p className="subtitle">
+            Upload your course notes below to create a personalized study guide!
+          </p>
+          <input
+            type="file"
+            className="file-input"
+            accept="application/pdf"
+            onChange={handleFileChange}
+          />
+          <button className="btn" onClick={handleSubmit}>
+            Generate Flashcards
+          </button>
+        </div>
+
+        <div className="flashcard-container">
+          {flashcards.map((flashcard, index) => (
+            <div
+              key={index}
+              className="flashcard"
+              onClick={() => handleCardClick(index)}
+            >
+              <p>
+                {flashcard.showAnswer ? (
+                  <>
+                    <strong>Answer:</strong> {flashcard.answer}
+                  </>
+                ) : (
+                  <>
+                    <strong>Question:</strong> {flashcard.question}
+                  </>
+                )}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
