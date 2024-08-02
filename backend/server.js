@@ -25,7 +25,7 @@ app.post('/login', (req, res) => {
     res.json({ token });
 });
 
-app.post('/generate_cue_cards', authenticateToken, upload.single('pdf'), async (req, res) => {
+app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
     try {
         let notes = req.body.notes || '';
 
@@ -35,7 +35,7 @@ app.post('/generate_cue_cards', authenticateToken, upload.single('pdf'), async (
             }
 
             const pdfData = await pdfParse(fs.readFileSync(req.file.path));
-            notes += pdfData.text;
+            notes += pdfData;
         }
 
         if (!notes) {
@@ -44,14 +44,19 @@ app.post('/generate_cue_cards', authenticateToken, upload.single('pdf'), async (
 
         const response = await openaiClient.completions.create({
             model: 'text-davinci-003',
-            prompt: `Generate cue cards from the following notes:\n${notes}`,
+            prompt: `Generate flashcards from the following notes:\n${notes}`,
             max_tokens: 150,
         });
 
-        res.json({ cue_cards: response.choices[0].text.trim() });
+        const flashcards = response.choices[0].text.trim().split('\n').map(line => {
+            const [question, answer] = line.split(':');
+            return { question, answer, showAnswer: false };
+        });
+
+        res.json({ flashcards });
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error generating cue cards');
+        res.status(500).send('Error generating flashcards');
     } finally {
         if (req.file) {
             fs.unlinkSync(req.file.path);
