@@ -2,17 +2,24 @@ import React, { useState } from "react";
 
 const Home = () => {
   const [file, setFile] = useState(null);
+  const [notes, setNotes] = useState('');
   const [flashcards, setFlashcards] = useState([]);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
 
+  const handleNotesChange = (event) => {
+    setNotes(event.target.value);
+  };
+
   const handleSubmit = async () => {
-    if (!file) return;
 
     const formData = new FormData();
-    formData.append("pdf", file);
+    formData.append("notes", notes);
+    if (file) {
+      formData.append("pdf", file);
+    }
 
     const response = await fetch("/generate-flashcards", {
       method: "POST",
@@ -22,6 +29,7 @@ const Home = () => {
     const data = await response.json();
     setFlashcards(data.flashcards);
     setFile(null);
+    setNotes('');
   };
 
   const handleCardClick = (index) => {
@@ -40,13 +48,20 @@ const Home = () => {
         <h1 className="heading">Welcome to YADA</h1>
         <div className="input-box">
           <p className="subtitle">
-            Upload your course notes below to create a personalized study guide!
+            Upload your course notes or paste them below to create a personalized study guide!
           </p>
+          <textarea
+              rows="10"
+              cols="50"
+              value={notes}
+              onChange={handleNotesChange}
+              placeholder="Paste your notes here..."
+          ></textarea>
           <input
-            type="file"
-            className="file-input"
-            accept="application/pdf"
-            onChange={handleFileChange}
+              type="file"
+              className="file-input"
+              accept="application/pdf"
+              onChange={handleFileChange}
           />
           <button className="btn" onClick={handleSubmit}>
             Generate Flashcards
@@ -55,10 +70,10 @@ const Home = () => {
 
         <div className="flashcard-container">
           {flashcards.map((flashcard, index) => (
-            <div
-              key={index}
-              className="flashcard"
-              onClick={() => handleCardClick(index)}
+              <div
+                  key={index}
+                  className="flashcard"
+                  onClick={() => handleCardClick(index)}
             >
               <p>
                 {flashcard.showAnswer ? (
