@@ -46,33 +46,36 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
             return res.status(400).send('No notes provided');
         }
 
-        // // Mocking OpenAI API response
-        // console.log('Mocking OpenAI API response');
-        // const mockResponse = {
-        //     choices: [
-        //         {
-        //             text: "Question 1: What is the capital of France?\nAnswer: Paris\nQuestion 2: What is the largest planet?\nAnswer: Jupiter",
-        //         }
-        //     ]
-        // };
+        // Mocking OpenAI API response
+        console.log('Mocking OpenAI API response');
+        const mockResponse = {
+            choices: [
+                {
+                    text: "Question 1: What is the capital of France?\nAnswer: Paris\nQuestion 2: What is the largest planet?\nAnswer: Jupiter",
+                }
+            ]
+        };
 
-        // const flashcards = mockResponse.choices[0].text.trim().split('\n').map(line => {
-        //     const [question, answer] = line.split(':');
-        //     return { question, answer, showAnswer: false };
-        // });
-
-        console.log('Calling OpenAI API'); // Log 6
-        const response = await openaiClient.completions.create({
-            model: 'gpt-3.5-turbo',
-            prompt: `Generate flashcards from the following notes:\n${notes}`,
-            max_tokens: 150,
-        });
-
-        console.log('OpenAI API response received'); // Log 7
-        const flashcards = response.choices[0].text.trim().split('\n').map(line => {
+        const flashcards = mockResponse.choices[0].text.trim().split('\n').map(line => {
             const [question, answer] = line.split(':');
             return { question, answer, showAnswer: false };
         });
+
+        // console.log('Calling OpenAI API'); // Log 6
+        // const response = await openaiClient.chat.completions.create({
+        //     model: 'gpt-4',
+        //     messages: [
+        //         { role: 'system', content: 'Generate flashcards from the following notes:' },
+        //         { role: 'user', content: notes }
+        //     ],
+        //     max_tokens: 150,
+        // });
+
+        // console.log('OpenAI API response received'); // Log 7
+        // const flashcards = response.choices[0].message.content.trim().split('\n').map(line => {
+        //     const [question, answer] = line.split(':');
+        //     return { question, answer, showAnswer: false };
+        // });
 
         res.json({ flashcards });
         console.log('Response sent'); // Log 8
