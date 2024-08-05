@@ -65,17 +65,27 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
         // const response = await openaiClient.chat.completions.create({
         //     model: 'gpt-4',
         //     messages: [
-        //         { role: 'system', content: 'Generate flashcards from the following notes:' },
-        //         { role: 'user', content: notes }
+        //         { role: 'system', content: 'You are a helpful assistant.' },
+        //         {
+        //             role: 'user',
+        //             content: `Generate question and answer flashcards from the following notes. 
+        //                       Please include a mix of true/false, fill-in-the-blank, and multiple-choice questions. 
+        //                       Format each flashcard as "Q: [Question]" and "A: [Answer]". 
+        //                       Here are the notes:\n${notes}`
+        //         }
         //     ],
         //     max_tokens: 150,
         // });
 
         // console.log('OpenAI API response received'); // Log 7
-        // const flashcards = response.choices[0].message.content.trim().split('\n').map(line => {
-        //     const [question, answer] = line.split(':');
-        //     return { question, answer, showAnswer: false };
-        // });
+        // const flashcards = response.choices[0].message.content.trim().split('\n').reduce((acc, line, index, arr) => {
+        //     if (line.startsWith('Q:')) {
+        //         acc.push({ question: line.slice(3).trim(), answer: '', showAnswer: false });
+        //     } else if (line.startsWith('A:') && acc.length > 0) {
+        //         acc[acc.length - 1].answer = line.slice(3).trim();
+        //     }
+        //     return acc;
+        // }, []);
 
         res.json({ flashcards });
         console.log('Response sent'); // Log 8
