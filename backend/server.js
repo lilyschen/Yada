@@ -3,9 +3,11 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { auth, requiresAuth } = require('express-openid-connect');
 const pdfParse = require('./utils/pdfUtils');
-const { auth0 } = require('./utils/config');
+const { auth0, db } = require('./utils/config');
+const Flashcard = require('./models/Flashcard');
 
 const openai = require('openai');
 const OpenAI = openai.OpenAI;
@@ -18,8 +20,14 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
 app.use(express.json());
-
 app.use(auth(auth0));
+
+// Connect to MongoDB
+mongoose.connect(db.uri, {}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+});
 
 // Routes
 app.get('/', (req, res) => {
@@ -30,13 +38,7 @@ app.get('/profile', requiresAuth(), (req, res) => {
     res.send(JSON.stringify(req.oidc.user));
 });
 
-app.post('/login', (req, res) => {
-    const user = { id: 1, username: 'user' };
-    const token = generateToken(user);
-    res.json({ token });
-});
-
-app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
+app.post('/generate-flashcards', requiresAuth(), upload.single('pdf'), async (req, res) => {
     try {
         console.log('Endpoint hit'); // Log 1
         let notes = req.body.notes || '';
@@ -103,6 +105,11 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
         //     return acc;
         // }, []);
 
+        // Save flashcards to the database
+        const userId = req.oidc.user.sub;
+        const flashcardDocs = flashcards.map(fc => ({ ...fc, userId }));
+        await Flashcard.insertMany(flashcardDocs);
+
         res.json({ flashcards });
         console.log('Response sent'); // Log 8
     } catch (error) {
@@ -113,6 +120,18 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
             fs.unlinkSync(req.file.path);
             console.log('Temporary file deleted'); // Log 10
         }
+    }
+});
+
+// Fetch user's flashcards
+app.get('/flashcards', requiresAuth(), async (req, res) => {
+    try {
+        const userId = req.oidc.user.sub;
+        const flashcards = await Flashcard.find({ userId });
+        res.json(flashcards);
+    } catch (error) {
+        console.error('Error fetching flashcards:', error);
+        res.status(500).send('Error fetching flashcards');
     }
 });
 
