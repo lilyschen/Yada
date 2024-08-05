@@ -21,7 +21,7 @@ const Home = () => {
       formData.append("pdf", file);
     }
 
-    const response = await fetch("/generate-flashcards", {
+    const response = await fetch("http://localhost:3000/generate-flashcards", {
       method: "POST",
       body: formData,
     });
@@ -51,17 +51,17 @@ const Home = () => {
             Upload your course notes or paste them below to create a personalized study guide!
           </p>
           <textarea
-              rows="10"
-              cols="50"
-              value={notes}
-              onChange={handleNotesChange}
-              placeholder="Paste your notes here..."
+            rows="10"
+            cols="50"
+            value={notes}
+            onChange={handleNotesChange}
+            placeholder="Paste your notes here..."
           ></textarea>
           <input
-              type="file"
-              className="file-input"
-              accept="application/pdf"
-              onChange={handleFileChange}
+            type="file"
+            className="file-input"
+            accept="application/pdf"
+            onChange={handleFileChange}
           />
           <button className="btn" onClick={handleSubmit}>
             Generate Flashcards
@@ -70,10 +70,10 @@ const Home = () => {
 
         <div className="flashcard-container">
           {flashcards.map((flashcard, index) => (
-              <div
-                  key={index}
-                  className="flashcard"
-                  onClick={() => handleCardClick(index)}
+            <div
+              key={index}
+              className="flashcard"
+              onClick={() => handleCardClick(index)}
             >
               <p>
                 {flashcard.showAnswer ? (

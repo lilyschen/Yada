@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
+const cors = require('cors');  
 const pdfParse = require('./utils/pdfUtils');
 const { authenticateToken, generateToken } = require('./utils/auth');
 
@@ -16,6 +17,7 @@ const openaiClient = new OpenAI({
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
+app.use(cors());
 app.use(express.json());
 
 app.post('/login', (req, res) => {
@@ -51,15 +53,19 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
         const mockResponse = {
             choices: [
                 {
-                    text: "Question 1: What is the capital of France?\nAnswer: Paris\nQuestion 2: What is the largest planet?\nAnswer: Jupiter",
+                    text: "Q: What is the capital of France?\nA: Paris\nQ: What is the largest planet?\nA: Jupiter",
                 }
             ]
         };
 
-        const flashcards = mockResponse.choices[0].text.trim().split('\n').map(line => {
-            const [question, answer] = line.split(':');
-            return { question, answer, showAnswer: false };
-        });
+        const flashcards = mockResponse.choices[0].text.trim().split('\n').reduce((acc, line, index, arr) => {
+            if (line.startsWith('Q:')) {
+                acc.push({ question: line.slice(3).trim(), answer: '', showAnswer: false });
+            } else if (line.startsWith('A:') && acc.length > 0) {
+                acc[acc.length - 1].answer = line.slice(3).trim();
+            }
+            return acc;
+        }, []);
 
         // console.log('Calling OpenAI API'); // Log 6
         // const response = await openaiClient.chat.completions.create({
