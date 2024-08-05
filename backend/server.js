@@ -2,14 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
-const cors = require('cors');  
+const cors = require('cors');
+const { auth, requiresAuth } = require('express-openid-connect');
 const pdfParse = require('./utils/pdfUtils');
-const { authenticateToken, generateToken } = require('./utils/auth');
+const { auth0 } = require('./utils/config');
 
 const openai = require('openai');
-
 const OpenAI = openai.OpenAI;
-
 const openaiClient = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -19,6 +18,17 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
 app.use(express.json());
+
+app.use(auth(auth0));
+
+// Routes
+app.get('/', (req, res) => {
+    res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+});
+
+app.get('/profile', requiresAuth(), (req, res) => {
+    res.send(JSON.stringify(req.oidc.user));
+});
 
 app.post('/login', (req, res) => {
     const user = { id: 1, username: 'user' };
