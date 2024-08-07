@@ -4,10 +4,10 @@ const multer = require('multer');
 const fs = require('fs');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { auth, requiresAuth } = require('express-openid-connect');
 const pdfParse = require('./utils/pdfUtils');
-const { auth0, db } = require('./utils/config');
 const Flashcard = require('./models/Flashcard');
+const { auth, requiresAuth } = require('express-openid-connect');
+const { db } = require('./utils/config');
 
 const openai = require('openai');
 const OpenAI = openai.OpenAI;
@@ -18,9 +18,26 @@ const openaiClient = new OpenAI({
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3001',
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(auth(auth0));
+
+const config = {
+    authRequired: false,
+    auth0Logout: true,
+    secret: process.env.AUTH0_SECRET,
+    baseURL: process.env.BASE_URL,
+    clientID: process.env.AUTH0_CLIENT_ID,
+    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL
+};
+
+app.use(auth(config));
 
 // Connect to MongoDB
 mongoose.connect(db.uri, {}).then(() => {
@@ -38,7 +55,7 @@ app.get('/profile', requiresAuth(), (req, res) => {
     res.send(JSON.stringify(req.oidc.user));
 });
 
-app.post('/generate-flashcards', requiresAuth(), upload.single('pdf'), async (req, res) => {
+app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
     try {
         console.log('Endpoint hit'); // Log 1
         let notes = req.body.notes || '';
@@ -47,7 +64,7 @@ app.post('/generate-flashcards', requiresAuth(), upload.single('pdf'), async (re
             console.log('File received'); // Log 2
             if (req.file.mimetype !== 'application/pdf') {
                 console.log('Uploaded file is not a PDF'); // Log 3
-                return res.status(400).send('Uploaded file is not a PDF');
+                return res.status(400).json({ error: 'Uploaded file is not a PDF' });
             }
 
             const pdfData = await pdfParse(fs.readFileSync(req.file.path));
@@ -106,7 +123,9 @@ app.post('/generate-flashcards', requiresAuth(), upload.single('pdf'), async (re
         // }, []);
 
         // Save flashcards to the database
-        const userId = req.oidc.user.sub;
+        // const userId = req.oidc.user.sub;
+        const userId = req.oidc.user ? req.oidc.user.sub : 'defaultUser'; // Ensure userId is defined
+        console.log('UserId:', userId); // Log userId
         const flashcardDocs = flashcards.map(fc => ({ ...fc, userId }));
         await Flashcard.insertMany(flashcardDocs);
 
@@ -114,7 +133,7 @@ app.post('/generate-flashcards', requiresAuth(), upload.single('pdf'), async (re
         console.log('Response sent'); // Log 8
     } catch (error) {
         console.error('Error generating flashcards:', error); // Log 9
-        res.status(500).send('Error generating flashcards');
+        res.status(500).json({ error: 'Error generating flashcards' });
     } finally {
         if (req.file) {
             fs.unlinkSync(req.file.path);
@@ -124,9 +143,9 @@ app.post('/generate-flashcards', requiresAuth(), upload.single('pdf'), async (re
 });
 
 // Fetch user's flashcards
-app.get('/flashcards', requiresAuth(), async (req, res) => {
+app.get('/flashcards', async (req, res) => {
     try {
-        const userId = req.oidc.user.sub;
+        const userId = req.oidc.user ? req.oidc.user.sub : 'defaultUser'; // Ensure userId is defined
         const flashcards = await Flashcard.find({ userId });
         res.json(flashcards);
     } catch (error) {

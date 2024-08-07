@@ -14,22 +14,31 @@ const Upload = () => {
   };
 
   const handleSubmit = async () => {
-
     const formData = new FormData();
     formData.append("notes", notes);
     if (file) {
       formData.append("pdf", file);
     }
 
-    const response = await fetch("http://localhost:3000/generate-flashcards", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("http://localhost:3000/generate-flashcards", {
+        method: "POST",
+        body: formData
+      });
 
-    const data = await response.json();
-    setFlashcards(data.flashcards);
-    setFile(null);
-    setNotes('');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const data = await response.json();
+      setFlashcards(data.flashcards);
+      setFile(null);
+      setNotes('');
+    } catch (error) {
+      console.error('Error generating flashcards:', error);
+      alert(`Error generating flashcards: ${error.message}`);
+    }
   };
 
   const handleCardClick = (index) => {
