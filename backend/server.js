@@ -221,6 +221,28 @@ app.delete('/delete-flashcard', async (req, res) => {
     }
 });
 
+app.put('/edit-flashcard', async (req, res) => {
+    try {
+        const { flashcardId, user, question, answer } = req.body;
+        const userEmail = user ? user.email : 'defaultEmail'; 
+
+        const flashcard = await Flashcard.findOneAndUpdate(
+            { _id: flashcardId, userEmail },
+            { question, answer },
+            { new: true }
+        );
+
+        if (!flashcard) {
+            return res.status(404).json({ error: 'Flashcard not found or you do not have permission to edit it' });
+        }
+
+        res.status(200).json({ message: 'Flashcard updated successfully', flashcard });
+    } catch (error) {
+        console.error('Error updating flashcard:', error);
+        res.status(500).json({ error: 'Error updating flashcard' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

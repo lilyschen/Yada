@@ -6,24 +6,27 @@ const Upload = () => {
   const [file, setFile] = useState(null);
   const [notes, setNotes] = useState('');
   const [flashcards, setFlashcards] = useState([]);
-  const [userInfo, setUserInfo] = useState(null);
   const [savedFlashcards, setSavedFlashcards] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editFlashcard, setEditFlashcard] = useState({ question: '', answer: '', _id: '' });
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      setUserInfo({
+      const userInfo = {
         sub: user.sub,
         email: user.email,
         name: user.name,
         picture: user.picture,
         updated_at: user.updated_at
-      });
+      };
+      setUserInfo(userInfo);
     }
   }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (userInfo) {
-      fetchSavedFlashcards();
+      fetchSavedFlashcards(userInfo);
     }
   }, [userInfo]);
 
@@ -79,20 +82,21 @@ const Upload = () => {
       }
 
       alert('Flashcard saved successfully');
+      fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after saving a new one
     } catch (error) {
       console.error('Error saving flashcard:', error);
       alert(`Error saving flashcard: ${error.message}`);
     }
   };
 
-  const fetchSavedFlashcards = async () => {
+  const fetchSavedFlashcards = async (user) => {
     try {
       const response = await fetch("http://localhost:3000/fetch-flashcards", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ user: userInfo })
+        body: JSON.stringify({ user })
       });
 
       if (!response.ok) {
@@ -105,6 +109,59 @@ const Upload = () => {
     } catch (error) {
       console.error('Error fetching flashcards:', error);
       alert(`Error fetching flashcards: ${error.message}`);
+    }
+  };
+
+  const handleDeleteFlashcard = async (flashcardId) => {
+    try {
+      const response = await fetch("http://localhost:3000/delete-flashcard", {
+        method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ flashcardId, user: userInfo })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      alert('Flashcard deleted successfully');
+      fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after deletion
+    } catch (error) {
+      console.error('Error deleting flashcard:', error);
+      alert(`Error deleting flashcard: ${error.message}`);
+    }
+  };
+
+  const handleEditFlashcard = (flashcard) => {
+    setEditFlashcard(flashcard);
+    setEditMode(true);
+  };
+
+  const handleSaveEditFlashcard = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/edit-flashcard", {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ flashcardId: editFlashcard._id, user: userInfo, question: editFlashcard.question, answer: editFlashcard.answer })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      alert('Flashcard updated successfully');
+      fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after updating
+      setEditMode(false);
+      setEditFlashcard({ question: '', answer: '', _id: '' });
+    } catch (error) {
+      console.error('Error updating flashcard:', error);
+      alert(`Error updating flashcard: ${error.message}`);
     }
   };
 
@@ -198,9 +255,38 @@ const Upload = () => {
                   </>
                 )}
               </p>
+              <button onClick={() => handleDeleteFlashcard(flashcard._id)}>
+                Delete Flashcard
+              </button>
+              <button onClick={() => handleEditFlashcard(flashcard)}>
+                Edit Flashcard
+              </button>
             </div>
           ))}
         </div>
+
+        {editMode && (
+          <div className="edit-box">
+            <h3>Edit Flashcard</h3>
+            <textarea
+              rows="2"
+              cols="50"
+              value={editFlashcard.question}
+              onChange={(e) => setEditFlashcard({ ...editFlashcard, question: e.target.value })}
+              placeholder="Edit question here..."
+            ></textarea>
+            <textarea
+              rows="2"
+              cols="50"
+              value={editFlashcard.answer}
+              onChange={(e) => setEditFlashcard({ ...editFlashcard, answer: e.target.value })}
+              placeholder="Edit answer here..."
+            ></textarea>
+            <button className="btn" onClick={handleSaveEditFlashcard}>
+              Save Changes
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
