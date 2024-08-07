@@ -6,7 +6,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const pdfParse = require('./utils/pdfUtils');
 const Flashcard = require('./models/Flashcard');
-const { auth, requiresAuth } = require('express-openid-connect');
+const User = require('./models/User');
 const { db } = require('./utils/config');
 
 const openai = require('openai');
@@ -28,17 +28,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const config = {
-    authRequired: false,
-    auth0Logout: true,
-    secret: process.env.AUTH0_CLIENT_SECRET,
-    baseURL: process.env.BASE_URL,
-    clientID: process.env.AUTH0_CLIENT_ID,
-    issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL
-};
-
-app.use(auth(config));
-
 // Connect to MongoDB
 mongoose.connect(db.uri, {}).then(() => {
     console.log('Connected to MongoDB');
@@ -46,13 +35,46 @@ mongoose.connect(db.uri, {}).then(() => {
     console.error('Error connecting to MongoDB:', err);
 });
 
+// Middleware to check if user exists in the database
+const checkUserExists = async (req, res, next) => {
+    if (req.body.user) {
+        const user = req.body.user;
+        try {
+            let existingUser = await User.findOne({ email: user.email });
+            if (!existingUser) {
+                const newUser = new User({
+                    sub: user.sub,
+                    email: user.email,
+                    name: user.name,
+                    picture: user.picture,
+                    updated_at: user.updated_at
+                });
+                await newUser.save();
+                console.log('New user saved to the database');
+            } else {
+                console.log('User already exists in the database');
+            }
+        } catch (error) {
+            console.error('Error checking/adding user to the database:', error);
+            return res.status(500).json({ error: 'Error checking/adding user to the database' });
+        }
+    } else {
+        return res.status(400).json({ error: 'User information is missing' });
+    }
+    next();
+};
+
 // Routes
 app.get('/', (req, res) => {
-    res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+    res.send('Welcome to the YADA API');
 });
 
-app.get('/profile', requiresAuth(), (req, res) => {
-    res.send(JSON.stringify(req.oidc.user));
+app.get('/profile', (req, res) => {
+    res.send('Profile endpoint');
+});
+
+app.post('/create-user', checkUserExists, (req, res) => {
+    res.status(200).json({ message: 'User checked/created successfully' });
 });
 
 app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
@@ -78,10 +100,10 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
         }
 
         // Mocking OpenAI API response
-        console.log('Mocking OpenAI API response');
         const mockResponse = {
             choices: [
                 {
+                    text: "Question 1: What is the capital of France?\nAnswer: Paris\nQuestion 2: What is the largest planet?\nAnswer: Jupiter",
                     text: "Q: What is the capital of France?\nA: Paris\nQ: What is the largest planet?\nA: Jupiter",
                 }
             ]
@@ -96,10 +118,11 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
             return acc;
         }, []);
 
-        // console.log('Calling OpenAI API'); // Log 6
         // const response = await openaiClient.chat.completions.create({
         //     model: 'gpt-4',
         //     messages: [
+        //         { role: 'system', content: 'Generate flashcards from the following notes:' },
+        //         { role: 'user', content: notes }
         //         { role: 'system', content: 'You are a helpful assistant.' },
         //         {
         //             role: 'user',
@@ -113,6 +136,11 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
         // });
 
         // console.log('OpenAI API response received'); // Log 7
+        // const flashcards = response.choices[0].message.content.trim().split('\n').map(line => {
+        //     const [question, answer] = line.split(':');
+        //     return { question, answer, showAnswer: false };
+        // });
+
         // const flashcards = response.choices[0].message.content.trim().split('\n').reduce((acc, line, index, arr) => {
         //     if (line.startsWith('Q:')) {
         //         acc.push({ question: line.slice(3).trim(), answer: '', showAnswer: false });
@@ -122,12 +150,6 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
         //     return acc;
         // }, []);
 
-        // Save flashcards to the database
-        // const userId = req.oidc.user.sub;
-        const userId = req.oidc.user ? req.oidc.user.sub : 'defaultUser'; // Ensure userId is defined
-        console.log('UserId:', userId); // Log userId
-        const flashcardDocs = flashcards.map(fc => ({ ...fc, userId }));
-        await Flashcard.insertMany(flashcardDocs);
 
         res.json({ flashcards });
         console.log('Response sent'); // Log 8
@@ -142,10 +164,26 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
     }
 });
 
-// Fetch user's flashcards
-app.get('/flashcards', async (req, res) => {
+app.post('/save-flashcard', async (req, res) => {
     try {
-        const userId = req.oidc.user ? req.oidc.user.sub : 'defaultUser'; // Ensure userId is defined
+        const { flashcard, user } = req.body;
+        const userId = user ? user.sub : 'defaultUser'; // Ensure userId is defined
+        const userEmail = user ? user.email : 'defaultEmail'; // Ensure userEmail is defined
+        console.log('UserId:', userId); // Log userId
+        console.log('UserEmail:', userEmail); // Log userEmail
+        const flashcardDoc = { ...flashcard, userId, userEmail };
+        await Flashcard.create(flashcardDoc);
+
+        res.status(200).json({ message: 'Flashcard saved successfully' });
+    } catch (error) {
+        console.error('Error saving flashcard:', error);
+        res.status(500).json({ error: 'Error saving flashcard' });
+    }
+});
+
+app.post('/flashcards', async (req, res) => {
+    try {
+        const userId = req.body.user ? req.body.user.sub : 'defaultUser'; // Ensure userId is defined
         const flashcards = await Flashcard.find({ userId });
         res.json(flashcards);
     } catch (error) {

@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const flashcardSchema = new Schema({
-    question: String,
-    answer: String,
+const flashcardSchema = new mongoose.Schema({
+    question: { type: String, required: true },
+    answer: { type: String, required: true },
+    showAnswer: { type: Boolean, default: false },
     userId: { type: String, required: true },
+    userEmail: { type: String, required: true } 
 });
 
 const Flashcard = mongoose.model('Flashcard', flashcardSchema);

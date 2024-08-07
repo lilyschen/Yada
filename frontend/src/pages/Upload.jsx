@@ -1,9 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const Upload = () => {
+  const { user, isAuthenticated } = useAuth0();
   const [file, setFile] = useState(null);
   const [notes, setNotes] = useState('');
   const [flashcards, setFlashcards] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setUserInfo({
+        sub: user.sub,
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
+        updated_at: user.updated_at
+      });
+    }
+  }, [isAuthenticated, user]);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -13,7 +28,7 @@ const Upload = () => {
     setNotes(event.target.value);
   };
 
-  const handleSubmit = async () => {
+  const handleGenerateFlashcards = async () => {
     const formData = new FormData();
     formData.append("notes", notes);
     if (file) {
@@ -38,6 +53,28 @@ const Upload = () => {
     } catch (error) {
       console.error('Error generating flashcards:', error);
       alert(`Error generating flashcards: ${error.message}`);
+    }
+  };
+
+  const handleSaveFlashcard = async (flashcard) => {
+    try {
+      const response = await fetch("http://localhost:3000/save-flashcard", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ flashcard, user: userInfo })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      alert('Flashcard saved successfully');
+    } catch (error) {
+      console.error('Error saving flashcard:', error);
+      alert(`Error saving flashcard: ${error.message}`);
     }
   };
 
@@ -72,7 +109,7 @@ const Upload = () => {
             accept="application/pdf"
             onChange={handleFileChange}
           />
-          <button className="btn" onClick={handleSubmit}>
+          <button className="btn" onClick={handleGenerateFlashcards} disabled={!userInfo}>
             Generate Flashcards
           </button>
         </div>
@@ -95,6 +132,9 @@ const Upload = () => {
                   </>
                 )}
               </p>
+              <button onClick={() => handleSaveFlashcard(flashcard)}>
+                Save Flashcard
+              </button>
             </div>
           ))}
         </div>
