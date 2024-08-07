@@ -6,11 +6,9 @@ const Home = () => {
   const { loginWithRedirect, logout, user, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/upload');
-    }
-  }, [isAuthenticated, navigate]);
+  const handleNavigate = () => {
+    navigate('/upload');
+  };
 
   return (
     <div className="main">
@@ -26,6 +24,7 @@ const Home = () => {
             <>
               <p>Welcome, {user.name}</p>
               <button onClick={() => logout({ returnTo: window.location.origin })}>Log Out</button>
+              <button onClick={handleNavigate}>Go to Upload</button>
             </>
           )}
         </div>
