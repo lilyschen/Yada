@@ -192,6 +192,17 @@ app.post('/flashcards', async (req, res) => {
     }
 });
 
+app.post('/fetch-flashcards', async (req, res) => {
+    try {
+        const userEmail = req.body.user ? req.body.user.email : 'defaultEmail'; // Ensure userEmail is defined
+        const flashcards = await Flashcard.find({ userEmail });
+        res.json(flashcards);
+    } catch (error) {
+        console.error('Error fetching flashcards:', error);
+        res.status(500).send('Error fetching flashcards');
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

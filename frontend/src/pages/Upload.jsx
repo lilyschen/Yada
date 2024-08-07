@@ -7,6 +7,7 @@ const Upload = () => {
   const [notes, setNotes] = useState('');
   const [flashcards, setFlashcards] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
+  const [savedFlashcards, setSavedFlashcards] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -19,6 +20,12 @@ const Upload = () => {
       });
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (userInfo) {
+      fetchSavedFlashcards();
+    }
+  }, [userInfo]);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -78,8 +85,41 @@ const Upload = () => {
     }
   };
 
+  const fetchSavedFlashcards = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/fetch-flashcards", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user: userInfo })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const data = await response.json();
+      setSavedFlashcards(data);
+    } catch (error) {
+      console.error('Error fetching flashcards:', error);
+      alert(`Error fetching flashcards: ${error.message}`);
+    }
+  };
+
   const handleCardClick = (index) => {
     setFlashcards((prevFlashcards) =>
+      prevFlashcards.map((flashcard, i) =>
+        i === index
+          ? { ...flashcard, showAnswer: !flashcard.showAnswer }
+          : flashcard
+      )
+    );
+  };
+
+  const handleSavedCardClick = (index) => {
+    setSavedFlashcards((prevFlashcards) =>
       prevFlashcards.map((flashcard, i) =>
         i === index
           ? { ...flashcard, showAnswer: !flashcard.showAnswer }
@@ -135,6 +175,29 @@ const Upload = () => {
               <button onClick={() => handleSaveFlashcard(flashcard)}>
                 Save Flashcard
               </button>
+            </div>
+          ))}
+        </div>
+
+        <h2>Saved Flashcards</h2>
+        <div className="flashcard-container">
+          {savedFlashcards.map((flashcard, index) => (
+            <div
+              key={index}
+              className="flashcard"
+              onClick={() => handleSavedCardClick(index)}
+            >
+              <p>
+                {flashcard.showAnswer ? (
+                  <>
+                    <strong>Answer:</strong> {flashcard.answer}
+                  </>
+                ) : (
+                  <>
+                    <strong>Question:</strong> {flashcard.question}
+                  </>
+                )}
+              </p>
             </div>
           ))}
         </div>
