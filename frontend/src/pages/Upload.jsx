@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Home = () => {
+const Upload = () => {
   const [file, setFile] = useState(null);
   const [notes, setNotes] = useState('');
   const [flashcards, setFlashcards] = useState([]);
@@ -94,4 +94,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Upload;
