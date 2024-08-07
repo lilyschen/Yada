@@ -167,10 +167,10 @@ app.post('/generate-flashcards', upload.single('pdf'), async (req, res) => {
 app.post('/save-flashcard', async (req, res) => {
     try {
         const { flashcard, user } = req.body;
-        const userId = user ? user.sub : 'defaultUser'; // Ensure userId is defined
-        const userEmail = user ? user.email : 'defaultEmail'; // Ensure userEmail is defined
-        console.log('UserId:', userId); // Log userId
-        console.log('UserEmail:', userEmail); // Log userEmail
+        const userId = user ? user.sub : 'defaultUser'; 
+        const userEmail = user ? user.email : 'defaultEmail'; 
+        console.log('UserId:', userId); 
+        console.log('UserEmail:', userEmail); 
         const flashcardDoc = { ...flashcard, userId, userEmail };
         await Flashcard.create(flashcardDoc);
 
@@ -183,7 +183,7 @@ app.post('/save-flashcard', async (req, res) => {
 
 app.post('/flashcards', async (req, res) => {
     try {
-        const userId = req.body.user ? req.body.user.sub : 'defaultUser'; // Ensure userId is defined
+        const userId = req.body.user ? req.body.user.sub : 'defaultUser'; 
         const flashcards = await Flashcard.find({ userId });
         res.json(flashcards);
     } catch (error) {
@@ -194,12 +194,30 @@ app.post('/flashcards', async (req, res) => {
 
 app.post('/fetch-flashcards', async (req, res) => {
     try {
-        const userEmail = req.body.user ? req.body.user.email : 'defaultEmail'; // Ensure userEmail is defined
+        const userEmail = req.body.user ? req.body.user.email : 'defaultEmail'; 
         const flashcards = await Flashcard.find({ userEmail });
         res.json(flashcards);
     } catch (error) {
         console.error('Error fetching flashcards:', error);
         res.status(500).send('Error fetching flashcards');
+    }
+});
+
+app.delete('/delete-flashcard', async (req, res) => {
+    try {
+        const { flashcardId, user } = req.body;
+        const userEmail = user ? user.email : 'defaultEmail'; 
+
+        const flashcard = await Flashcard.findOneAndDelete({ _id: flashcardId, userEmail });
+
+        if (!flashcard) {
+            return res.status(404).json({ error: 'Flashcard not found or you do not have permission to delete it' });
+        }
+
+        res.status(200).json({ message: 'Flashcard deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting flashcard:', error);
+        res.status(500).json({ error: 'Error deleting flashcard' });
     }
 });
 
