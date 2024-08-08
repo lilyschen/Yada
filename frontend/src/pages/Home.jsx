@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import Nav from "../components/NavBar";
+import LogoutButton from "../components/LogoutButton";
 
 const Home = () => {
   const {
@@ -43,7 +44,7 @@ const Home = () => {
   };
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin }).then(() => {
+    logout({ logoutParams: { returnTo: window.location.origin } }).then(() => {
       window.location.href = "http://localhost:3001";
     });
   };
@@ -83,9 +84,10 @@ const Home = () => {
               <button className="upload-btn" onClick={handleNavigate}>
                 Upload Your Notes
               </button>
-              <button className="logout-btn" onClick={handleLogout}>
+              <LogoutButton />
+              {/* <button className="logout-btn" onClick={handleLogout}>
                 Log Out
-              </button>
+              </button> */}
             </>
           )}
         </div>
