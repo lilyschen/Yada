@@ -243,6 +243,30 @@ app.put('/edit-flashcard', async (req, res) => {
     }
 });
 
+app.post('/create-flashcard', async (req, res) => {
+    try {
+        const { question, answer, user } = req.body;
+        const userId = user ? user.sub : 'defaultUser';
+        const userEmail = user ? user.email : 'defaultEmail';
+        console.log('UserId:', userId);
+        console.log('UserEmail:', userEmail);
+
+        const flashcard = new Flashcard({
+            question,
+            answer,
+            userId,
+            userEmail,
+            showAnswer: false
+        });
+        await flashcard.save();
+
+        res.status(200).json({ message: 'Flashcard created successfully', flashcard });
+    } catch (error) {
+        console.error('Error creating flashcard:', error);
+        res.status(500).json({ error: 'Error creating flashcard' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
