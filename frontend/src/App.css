@@ -11,46 +11,78 @@ body {
 :root {
   --primary: #37b0bd;
   --heading-color: #181826;
-  --bg-shade: #e2fafa;
+  --bg-shade: #eff7f7;
   --black: #000000;
   --white: #ffffff;
 }
 
-.main {
-  width: 100%;
+.overlay {
+  width: 100vw;
   height: 100vh;
-  position: relative;
-  overflow: hidden;
+  position: fixed;
+}
+
+nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav .logo-container {
+  width: 80px;
+  margin: 10px;
+}
+
+nav .logo-container .logo {
+  width: 100%;
+  margin-left: 20px;
 }
 
 .homepage {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
+  width: 100%;
   height: 100vh;
+  position: relative;
+  overflow: hidden;
   background-color: var(--bg-shade);
-  padding: 0px 100px;
-  gap: 30px;
+  gap: 90px;
+  text-align: center;
+  width: 100%;
+  height: 100vh;
 }
 
 .heading {
-  color: var(--primary);
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.definition-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.definition {
+  font-size: 1.2rem;
 }
 .subtitle {
   color: var(--heading-color);
   text-align: center;
 }
 
-.input-box {
+.text-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  padding: 50px;
 }
+
 .file-input {
-  margin: 10px 0;
+  margin: 10px;
   font-size: 16px;
   cursor: pointer;
 }
@@ -85,6 +117,45 @@ body {
   justify-content: center;
 }
 
+.get-started-btn,
+.logout-btn,
+.upload-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.get-started-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.get-started-btn:hover {
+  background-color: #0056b3;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.logout-btn:hover {
+  background-color: #a71d2a;
+}
+
+.upload-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.upload-btn:hover {
+  background-color: #1e7e34;
+}
 .btn:hover {
   color: var(--primary);
   background-color: var(--white);

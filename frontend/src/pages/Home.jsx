@@ -1,13 +1,20 @@
 import React, { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import Nav from "../components/NavBar";
 
 const Home = () => {
-  const { loginWithRedirect, logout, user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const {
+    loginWithRedirect,
+    logout,
+    user,
+    isAuthenticated,
+    getAccessTokenSilently,
+  } = useAuth0();
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate('/upload');
+    navigate("/upload");
   };
 
   const handleLogin = async () => {
@@ -19,18 +26,18 @@ const Home = () => {
           email: user.email,
           name: user.name,
           picture: user.picture,
-          updated_at: user.updated_at
+          updated_at: user.updated_at,
         };
-        await fetch('http://localhost:3000/create-user', {
-          method: 'POST',
+        await fetch("http://localhost:3000/create-user", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ user: userInfo })
+          body: JSON.stringify({ user: userInfo }),
         });
       } catch (error) {
-        console.error('Error logging in:', error);
+        console.error("Error logging in:", error);
       }
     }
   };
@@ -42,20 +49,40 @@ const Home = () => {
   }, [isAuthenticated, user]);
 
   return (
-    <div className="main">
+    <div className="overlay">
+      <Nav />
       <div className="homepage">
-        <h1 className="heading">Welcome to YADA</h1>
-        <div className="input-box">
+        <div className="definition-box">
+          <h1 className="heading">Yada</h1>
+          <p className="definition">
+            /yaa-da/ | noun (punjabi) <br />
+            def: memory; memorization
+          </p>
+        </div>
+        <div className="text-box">
           <p className="subtitle">
-            Upload your course notes or paste them below to create a personalized study guide!
+            Revolutionize your studying and improve memorisation with our
+            AI-generated flashcards
           </p>
           {!isAuthenticated ? (
-            <button onClick={() => loginWithRedirect()}>Log In</button>
+            <button
+              className="get-started-btn"
+              onClick={() => loginWithRedirect()}
+            >
+              Get Started
+            </button>
           ) : (
             <>
               <p>Welcome, {user.name}</p>
-              <button onClick={() => logout({ returnTo: window.location.origin })}>Log Out</button>
-              <button onClick={handleNavigate}>Go to Upload</button>
+              <button className="upload-btn" onClick={handleNavigate}>
+                Upload Your Notes
+              </button>
+              <button
+                className="logout-btn"
+                onClick={() => logout({ returnTo: window.location.origin })}
+              >
+                Log Out
+              </button>
             </>
           )}
         </div>
