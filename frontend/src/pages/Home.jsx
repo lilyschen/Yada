@@ -42,6 +42,12 @@ const Home = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout({ returnTo: window.location.origin }).then(() => {
+      window.location.href = "http://localhost:3001";
+    });
+  };
+
   useEffect(() => {
     if (isAuthenticated && user) {
       handleLogin();
@@ -77,10 +83,7 @@ const Home = () => {
               <button className="upload-btn" onClick={handleNavigate}>
                 Upload Your Notes
               </button>
-              <button
-                className="logout-btn"
-                onClick={() => logout({ returnTo: window.location.origin })}
-              >
+              <button className="logout-btn" onClick={handleLogout}>
                 Log Out
               </button>
             </>
