@@ -7,7 +7,6 @@ import LogoutButton from "../components/LogoutButton";
 const Home = () => {
   const {
     loginWithRedirect,
-    logout,
     user,
     isAuthenticated,
     getAccessTokenSilently,
@@ -41,12 +40,6 @@ const Home = () => {
         console.error("Error logging in:", error);
       }
     }
-  };
-
-  const handleLogout = () => {
-    logout({ logoutParams: { returnTo: window.location.origin } }).then(() => {
-      window.location.href = "http://localhost:3001";
-    });
   };
 
   useEffect(() => {
@@ -85,9 +78,6 @@ const Home = () => {
                 Upload Your Notes
               </button>
               <LogoutButton />
-              {/* <button className="logout-btn" onClick={handleLogout}>
-                Log Out
-              </button> */}
             </>
           )}
         </div>

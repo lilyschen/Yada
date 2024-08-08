@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import SavedFlashcards from "../components/SavedFlashcards";
+
 
 const Upload = () => {
   const { user, isAuthenticated } = useAuth0();
@@ -399,43 +401,15 @@ const Upload = () => {
           ))}
         </div>
 
-        <h2>Saved Flashcards</h2>
-        <div className="flashcard-container">
-          {savedFlashcards.map((flashcard, index) => (
-            <div
-              key={index}
-              className="flashcard"
-              onClick={() => handleSavedCardClick(index)}
-            >
-              <p>
-                {flashcard.showAnswer ? (
-                  <>
-                    <strong>Answer:</strong> {flashcard.answer}
-                  </>
-                ) : (
-                  <>
-                    <strong>Question:</strong> {flashcard.question}
-                  </>
-                )}
-              </p>
-              <button onClick={() => handleDeleteFlashcard(flashcard._id)}>
-                Delete Flashcard
-              </button>
-              <button onClick={() => handleEditFlashcard(flashcard)}>
-                Edit Flashcard
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedFlashcardId(flashcard._id);
-                  handleAddFlashcardToStudySet(flashcard._id, selectedStudySet);
-                }}
-                disabled={!selectedStudySet}
-              >
-                Add to Study Set
-              </button>
-            </div>
-          ))}
-        </div>
+        <SavedFlashcards
+          savedFlashcards={savedFlashcards}
+          handleSavedCardClick={handleSavedCardClick}
+          handleDeleteFlashcard={handleDeleteFlashcard}
+          handleEditFlashcard={handleEditFlashcard}
+          handleAddFlashcardToStudySet={handleAddFlashcardToStudySet}
+          selectedStudySet={selectedStudySet}
+          setSelectedFlashcardId={setSelectedFlashcardId}
+        />
 
         {editMode && (
           <div className="edit-box">
