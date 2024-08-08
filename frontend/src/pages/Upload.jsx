@@ -7,11 +7,15 @@ const Upload = () => {
   const [notes, setNotes] = useState('');
   const [flashcards, setFlashcards] = useState([]);
   const [savedFlashcards, setSavedFlashcards] = useState([]);
+  const [studySets, setStudySets] = useState([]);
+  const [selectedStudySet, setSelectedStudySet] = useState('');
+  const [selectedFlashcardId, setSelectedFlashcardId] = useState('');
   const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editFlashcard, setEditFlashcard] = useState({ question: '', answer: '', _id: '' });
   const [manualQuestion, setManualQuestion] = useState('');
   const [manualAnswer, setManualAnswer] = useState('');
+  const [newStudySetName, setNewStudySetName] = useState('');
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -29,6 +33,7 @@ const Upload = () => {
   useEffect(() => {
     if (userInfo) {
       fetchSavedFlashcards(userInfo);
+      fetchStudySets(userInfo);
     }
   }, [userInfo]);
 
@@ -111,6 +116,81 @@ const Upload = () => {
     } catch (error) {
       console.error('Error fetching flashcards:', error);
       alert(`Error fetching flashcards: ${error.message}`);
+    }
+  };
+
+  const fetchStudySets = async (user) => {
+    try {
+      const response = await fetch("http://localhost:3000/fetch-study-sets", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const data = await response.json();
+      setStudySets(data);
+    } catch (error) {
+      console.error('Error fetching study sets:', error);
+      alert(`Error fetching study sets: ${error.message}`);
+    }
+  };
+
+  const handleCreateStudySet = async () => {
+    if (!newStudySetName) {
+      alert('Please enter a study set name');
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/create-study-set", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newStudySetName, user: userInfo })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      alert('Study set created successfully');
+      setNewStudySetName('');
+      fetchStudySets(userInfo); // Refresh the study sets after creating a new one
+    } catch (error) {
+      console.error('Error creating study set:', error);
+      alert(`Error creating study set: ${error.message}`);
+    }
+  };
+
+  const handleAddFlashcardToStudySet = async (flashcardId, studySetId) => {
+    try {
+      const response = await fetch("http://localhost:3000/add-flashcard-to-study-set", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ flashcardId, studySetId })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      alert('Flashcard added to study set successfully');
+      fetchStudySets(userInfo); // Refresh the study sets after adding a flashcard
+    } catch (error) {
+      console.error('Error adding flashcard to study set:', error);
+      alert(`Error adding flashcard to study set: ${error.message}`);
     }
   };
 
@@ -264,6 +344,36 @@ const Upload = () => {
           </button>
         </div>
 
+        <div className="input-box">
+          <h3>Create Study Set</h3>
+          <input
+            type="text"
+            value={newStudySetName}
+            onChange={(e) => setNewStudySetName(e.target.value)}
+            placeholder="Enter study set name"
+          />
+          <button className="btn" onClick={handleCreateStudySet} disabled={!userInfo}>
+            Create Study Set
+          </button>
+        </div>
+
+        <div className="input-box">
+          <h3>Add Flashcard to Study Set</h3>
+          <select onChange={(e) => setSelectedStudySet(e.target.value)} value={selectedStudySet}>
+            <option value="">Select Study Set</option>
+            {studySets.map((set) => (
+              <option key={set._id} value={set._id}>{set.name}</option>
+            ))}
+          </select>
+          <button
+            className="btn"
+            onClick={() => handleAddFlashcardToStudySet(selectedFlashcardId, selectedStudySet)}
+            disabled={!userInfo || !selectedStudySet || !selectedFlashcardId}
+          >
+            Add Flashcard to Study Set
+          </button>
+        </div>
+
         <div className="flashcard-container">
           {flashcards.map((flashcard, index) => (
             <div
@@ -313,6 +423,15 @@ const Upload = () => {
               </button>
               <button onClick={() => handleEditFlashcard(flashcard)}>
                 Edit Flashcard
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedFlashcardId(flashcard._id);
+                  handleAddFlashcardToStudySet(flashcard._id, selectedStudySet);
+                }}
+                disabled={!selectedStudySet}
+              >
+                Add to Study Set
               </button>
             </div>
           ))}

@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const pdfParse = require('./utils/pdfUtils');
 const Flashcard = require('./models/Flashcard');
 const User = require('./models/User');
+const StudySet = require('./models/StudySet');
+
 const { db } = require('./utils/config');
 
 const openai = require('openai');
@@ -264,6 +266,47 @@ app.post('/create-flashcard', async (req, res) => {
     } catch (error) {
         console.error('Error creating flashcard:', error);
         res.status(500).json({ error: 'Error creating flashcard' });
+    }
+});
+
+app.post('/create-study-set', async (req, res) => {
+    try {
+        const { name, user } = req.body;
+        const userId = user ? user.sub : 'defaultUser';
+        const studySet = new StudySet({ name, userId, flashcards: [] });
+        await studySet.save();
+        res.status(200).json({ message: 'Study set created successfully', studySet });
+    } catch (error) {
+        console.error('Error creating study set:', error);
+        res.status(500).json({ error: 'Error creating study set' });
+    }
+});
+
+app.post('/add-flashcard-to-study-set', async (req, res) => {
+    try {
+        const { studySetId, flashcardId } = req.body;
+        const studySet = await StudySet.findById(studySetId);
+        if (!studySet) {
+            return res.status(404).json({ error: 'Study set not found' });
+        }
+        studySet.flashcards.push(flashcardId);
+        await studySet.save();
+        res.status(200).json({ message: 'Flashcard added to study set successfully', studySet });
+    } catch (error) {
+        console.error('Error adding flashcard to study set:', error);
+        res.status(500).json({ error: 'Error adding flashcard to study set' });
+    }
+});
+
+app.post('/fetch-study-sets', async (req, res) => {
+    try {
+        const { user } = req.body;
+        const userId = user ? user.sub : 'defaultUser';
+        const studySets = await StudySet.find({ userId }).populate('flashcards');
+        res.status(200).json(studySets);
+    } catch (error) {
+        console.error('Error fetching study sets:', error);
+        res.status(500).json({ error: 'Error fetching study sets' });
     }
 });
 
