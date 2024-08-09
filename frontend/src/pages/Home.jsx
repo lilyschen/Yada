@@ -56,7 +56,7 @@ const Home = () => {
           <p className="definition-large">memory</p>
         </div>
         <div className="text-box">
-          <p className="slogan-text">REVOLUTIONIZE YOUR MEMORISATION</p>
+          <p className="slogan-text">REVOLUTIONIZE YOUR MEMORIZATION</p>
           {!isAuthenticated ? (
             <button
               className="get-started-btn"
@@ -66,11 +66,10 @@ const Home = () => {
             </button>
           ) : (
             <>
-              <p>Welcome, {user.name}</p>
+              <p className="subtitle">Welcome, {user.name}</p>
               <button className="upload-btn" onClick={handleNavigate}>
                 Upload Your Notes
               </button>
-              <LogoutButton />
             </>
           )}
         </div>
