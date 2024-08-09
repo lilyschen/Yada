@@ -1,3 +1,16 @@
+.dm-serif-display-regular {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.dm-serif-display-regular-italic {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+html,
 body {
   margin: 0;
   padding: 0;
@@ -8,85 +21,115 @@ body {
   font-style: normal;
 }
 
+/* Root Variables */
 :root {
-  --primary: #37b0bd;
+  --primary: #e0f6f9;
+  --secondary: #41cde0;
   --heading-color: #181826;
-  --bg-shade: #eff7f7;
+  --bg-shade: #f9f9f9;
   --black: #000000;
   --white: #ffffff;
+  --highlight: #007bff;
+  --highlight-hover: #0056b3;
 }
 
+/* Overlay Container */
 .overlay {
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
+  min-height: 100vh; /* Allows content to grow and page to scroll */
+  position: relative; /* or absolute, depending on the context */
+  overflow-y: auto; /* Ensure vertical scrolling is enabled */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-shade);
 }
 
+/* Navbar */
 nav {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  background-color: var(--white);
+  padding: 10px 20px;
 }
 
 nav .logo-container {
-  width: 80px;
-  margin: 10px;
+  width: 100px;
+  margin: 0 20px;
 }
 
 nav .logo-container .logo {
   width: 100%;
-  margin-left: 20px;
 }
 
+/* Homepage Styling */
 .homepage {
   display: flex;
   flex-direction: row;
   justify-content: center;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 60px); /* Adjusted for Navbar height */
   position: relative;
-  overflow: hidden;
-  background-color: var(--bg-shade);
+  padding: 0 50px;
   gap: 90px;
-  text-align: center;
-  width: 100%;
-  height: 100vh;
+  text-align: left;
+  background-color: var(--primary);
 }
 
+/* Heading and Definition Box */
 .heading {
-  font-size: 3rem;
-  margin-bottom: 10px;
+  font-size: 6rem;
+  color: var(--heading-color);
+  margin-bottom: 0px;
 }
 
 .definition-box {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding: 20px;
 }
-.definition {
+.definition-small {
   font-size: 1.2rem;
-}
-.subtitle {
-  color: var(--heading-color);
-  text-align: center;
+  margin: 0px;
+  text-align: left;
 }
 
+.definition-large {
+  font-size: 2rem;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.slogan-text {
+  font-size: 3rem;
+  color: var(--heading-color);
+  line-height: 40px;
+  line-height-step: inherit;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--heading-color);
+  margin-bottom: 20px;
+}
+
+/* Text Box */
 .text-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 40px;
   padding: 50px;
+  background-color: var(--white);
+  /* border-radius: 5px;
+  box-shadow: 0 0px 10px rgba(0, 0, 0, 0.1); */
 }
 
-.file-input {
-  margin: 10px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
+/* Button Styles */
 .btn {
   display: inline-block;
   padding: 12px 32px;
@@ -97,8 +140,10 @@ nav .logo-container .logo {
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  border-radius: 4px;
-  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  transition: background-color 0.5s, color 0.5s;
+
+  /* -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
@@ -106,20 +151,13 @@ nav .logo-container .logo {
   -webkit-transition: background-color 0.5s;
   -moz-transition: background-color 0.5s;
   -ms-transition: background-color 0.5s;
-  -o-transition: background-color 0.5s;
-}
-
-.btn {
-  color: var(--white);
-  background-color: var(--primary);
-  border: 1px solid var(--primary);
-  align-self: center;
-  justify-content: center;
+  -o-transition: background-color 0.5s; */
 }
 
 .get-started-btn,
 .logout-btn,
-.upload-btn {
+.upload-btn,
+.btn {
   display: block;
   margin: 10px auto;
   padding: 10px 20px;
@@ -131,7 +169,7 @@ nav .logo-container .logo {
 }
 
 .get-started-btn {
-  background-color: #007bff;
+  background-color: var(--secondary);
   color: white;
 }
 
@@ -139,31 +177,86 @@ nav .logo-container .logo {
   background-color: #0056b3;
 }
 
-.logout-btn {
-  background-color: #dc3545;
+.logout-btn,
+.upload-btn,
+.btn {
+  background-color: var(--black);
   color: white;
 }
 
-.logout-btn:hover {
-  background-color: #a71d2a;
-}
-
-.upload-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-.upload-btn:hover {
-  background-color: #1e7e34;
-}
+.logout-btn:hover,
+.upload-btn:hover,
 .btn:hover {
-  color: var(--primary);
+  background-color: var(--secondary);
+}
+
+/* END OF BUTTONS */
+
+/* UPLOAD PAGE CSS */
+.upload-page {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  background-color: var(--bg-shade);
+  padding: 20px 50px;
+  border-radius: 10px;
+}
+
+.input-box,
+.edit-box {
   background-color: var(--white);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+textarea {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 1px solid var(--black);
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 1rem;
+}
+
+.text {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 1px solid var(--black);
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 1rem;
+}
+.file-input {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .flashcard-container {
-  margin-top: 20px;
-  width: 100%;
+  grid-column: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: var(--white);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.manual-flashcard-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--white);
+  padding: 20px;
+  gap: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .flashcard {
@@ -180,5 +273,24 @@ nav .logo-container .logo {
 }
 
 .flashcard p {
+  display: flex;
+  flex-direction: row;
   margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  border: 1px solid var(--black);
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+h3 {
+  margin: 10px 0;
 }

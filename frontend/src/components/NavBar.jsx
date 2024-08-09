@@ -3,7 +3,7 @@ const Nav = () => {
   return (
     <nav>
       <div className="logo-container">
-        <img className="logo" src="./logo192.png" alt="image." />
+        <img className="logo" src="./yada-logo.png" alt="image." />
       </div>
     </nav>
   );

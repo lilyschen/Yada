@@ -5,12 +5,8 @@ import Nav from "../components/NavBar";
 import LogoutButton from "../components/LogoutButton";
 
 const Home = () => {
-  const {
-    loginWithRedirect,
-    user,
-    isAuthenticated,
-    getAccessTokenSilently,
-  } = useAuth0();
+  const { loginWithRedirect, user, isAuthenticated, getAccessTokenSilently } =
+    useAuth0();
   const navigate = useNavigate();
 
   const handleNavigate = () => {
@@ -54,16 +50,13 @@ const Home = () => {
       <div className="homepage">
         <div className="definition-box">
           <h1 className="heading">Yada</h1>
-          <p className="definition">
+          <p className="definition-small">
             /yaa-da/ | noun (punjabi) <br />
-            def: memory; memorization
           </p>
+          <p className="definition-large">memory</p>
         </div>
         <div className="text-box">
-          <p className="subtitle">
-            Revolutionize your studying and improve memorisation with our
-            AI-generated flashcards
-          </p>
+          <p className="slogan-text">REVOLUTIONIZE YOUR MEMORISATION</p>
           {!isAuthenticated ? (
             <button
               className="get-started-btn"
