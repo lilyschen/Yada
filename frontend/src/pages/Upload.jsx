@@ -3,7 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import SavedFlashcards from "../components/SavedFlashcards";
 import ManualFlashcard from "../components/ManualFlashcard";
 import StudySets from "../components/StudySets";
-import Nav from "../components/NavBar";
+import Nav from "../components/nav/NavBar";
 
 const Upload = () => {
   const { user, isAuthenticated } = useAuth0();

@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
-import Nav from "../components/NavBar";
-import LogoutButton from "../components/LogoutButton";
+import Nav from "../components/nav/NavBar";
+import DefinitionBox from "../components/home/DefinitionBox";
+import SloganText from "../components/home/SloganText";
+import { createUser } from "../services/userService";  
 
 const Home = () => {
   const { loginWithRedirect, user, isAuthenticated, getAccessTokenSilently } =
@@ -24,14 +26,7 @@ const Home = () => {
           picture: user.picture,
           updated_at: user.updated_at,
         };
-        await fetch("http://localhost:3000/create-user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ user: userInfo }),
-        });
+        await createUser(userInfo, token);  
       } catch (error) {
         console.error("Error logging in:", error);
       }
@@ -48,31 +43,13 @@ const Home = () => {
     <div className="overlay">
       <Nav />
       <div className="homepage">
-        <div className="definition-box">
-          <h1 className="heading">Yada</h1>
-          <p className="definition-small">
-            /yaa-da/ | noun (punjabi) <br />
-          </p>
-          <p className="definition-large">memory</p>
-        </div>
-        <div className="text-box">
-          <p className="slogan-text">REVOLUTIONIZE YOUR MEMORIZATION</p>
-          {!isAuthenticated ? (
-            <button
-              className="get-started-btn"
-              onClick={() => loginWithRedirect()}
-            >
-              Get Started
-            </button>
-          ) : (
-            <>
-              <p className="subtitle">Welcome, {user.name}</p>
-              <button className="upload-btn" onClick={handleNavigate}>
-                Upload Your Notes
-              </button>
-            </>
-          )}
-        </div>
+        <DefinitionBox />
+        <SloganText
+          isAuthenticated={isAuthenticated}
+          user={user}
+          loginWithRedirect={loginWithRedirect}
+          handleNavigate={handleNavigate}
+        />
       </div>
     </div>
   );
