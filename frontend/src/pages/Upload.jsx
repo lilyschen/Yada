@@ -288,6 +288,29 @@ const Upload = () => {
     setSelectedStudySet(studySetId);
   };
 
+  const fetchFlashcardsInStudySet = async (studySetName) => {
+    try {
+      const response = await fetch("http://localhost:3000/view-study-set", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ studySetName, user: userInfo }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const flashcards = await response.json();
+      setSavedFlashcards(flashcards); // Display flashcards of the selected study set
+    } catch (error) {
+      console.error("Error fetching study set flashcards:", error);
+      alert(`Error fetching study set flashcards: ${error.message}`);
+    }
+  };
+
   return (
     <div className="overlay">
       <Nav />
@@ -374,6 +397,7 @@ const Upload = () => {
         <StudySets
           studySets={studySets}
           handleSelectStudySet={handleSelectStudySet}
+          fetchFlashcardsInStudySet={fetchFlashcardsInStudySet}
         />
 
         <div className="flashcard-container">
