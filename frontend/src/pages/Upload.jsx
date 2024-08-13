@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import SavedFlashcards from "../components/SavedFlashcards";
 import ManualFlashcard from "../components/ManualFlashcard";
+import StudySets from "../components/StudySets";
 import Nav from "../components/NavBar";
 
 const Upload = () => {
@@ -283,6 +284,10 @@ const Upload = () => {
     );
   };
 
+  const handleSelectStudySet = (studySetId) => {
+    setSelectedStudySet(studySetId);
+  };
+
   return (
     <div className="overlay">
       <Nav />
@@ -365,6 +370,11 @@ const Upload = () => {
             Add Flashcard to Study Set
           </button>
         </div>
+
+        <StudySets
+          studySets={studySets}
+          handleSelectStudySet={handleSelectStudySet}
+        />
 
         <div className="flashcard-container">
           {flashcards.map((flashcard, index) => (

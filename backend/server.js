@@ -273,6 +273,13 @@ app.post('/create-study-set', async (req, res) => {
     try {
         const { name, user } = req.body;
         const userId = user ? user.sub : 'defaultUser';
+
+        // Check if a study set with the same name already exists for the user
+        const existingStudySet = await StudySet.findOne({ name, userId });
+        if (existingStudySet) {
+            return res.status(400).json({ error: 'Study set with this name already exists' });
+        }
+
         const studySet = new StudySet({ name, userId, flashcards: [] });
         await studySet.save();
         res.status(200).json({ message: 'Study set created successfully', studySet });
