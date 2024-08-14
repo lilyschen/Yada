@@ -4,6 +4,19 @@ import SavedFlashcards from "../components/SavedFlashcards";
 import ManualFlashcard from "../components/ManualFlashcard";
 import StudySets from "../components/StudySets";
 import Nav from "../components/nav/NavBar";
+import TextArea from "../components/TextArea";
+import EditFlashcard from "../components/EditFlashcard";
+import FlashcardList from "../components/FlashcardList";
+import CreateStudySet from "../components/CreateStudySet";
+import {
+  fetchSavedFlashcards,
+  deleteFlashcard
+} from "../services/flashcardService";
+import {
+  fetchStudySets,
+  createStudySet,
+  addFlashcardToStudySet
+} from "../services/studySetService";
 
 const Upload = () => {
   const { user, isAuthenticated } = useAuth0();
@@ -38,8 +51,8 @@ const Upload = () => {
 
   useEffect(() => {
     if (userInfo) {
-      fetchSavedFlashcards(userInfo);
-      fetchStudySets(userInfo);
+      fetchSavedFlashcards(userInfo).then(setSavedFlashcards);
+      fetchStudySets(userInfo).then(setStudySets);
     }
   }, [userInfo]);
 
@@ -105,52 +118,6 @@ const Upload = () => {
     }
   };
 
-  const fetchSavedFlashcards = async (user) => {
-    try {
-      const response = await fetch("http://localhost:3000/fetch-flashcards", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
-      const data = await response.json();
-      setSavedFlashcards(data);
-    } catch (error) {
-      console.error("Error fetching flashcards:", error);
-      alert(`Error fetching flashcards: ${error.message}`);
-    }
-  };
-
-  const fetchStudySets = async (user) => {
-    try {
-      const response = await fetch("http://localhost:3000/fetch-study-sets", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
-      const data = await response.json();
-      setStudySets(data);
-    } catch (error) {
-      console.error("Error fetching study sets:", error);
-      alert(`Error fetching study sets: ${error.message}`);
-    }
-  };
-
   const handleCreateStudySet = async () => {
     if (!newStudySetName) {
       alert("Please enter a study set name");
@@ -158,22 +125,10 @@ const Upload = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/create-study-set", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: newStudySetName, user: userInfo }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
+      await createStudySet(newStudySetName, userInfo);
       alert("Study set created successfully");
       setNewStudySetName("");
-      fetchStudySets(userInfo); // Refresh the study sets after creating a new one
+      fetchStudySets(userInfo).then(setStudySets);
     } catch (error) {
       console.error("Error creating study set:", error);
       alert(`Error creating study set: ${error.message}`);
@@ -182,24 +137,9 @@ const Upload = () => {
 
   const handleAddFlashcardToStudySet = async (flashcardId, studySetId) => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/add-flashcard-to-study-set",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ flashcardId, studySetId }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
+      await addFlashcardToStudySet(flashcardId, studySetId);
       alert("Flashcard added to study set successfully");
-      fetchStudySets(userInfo); // Refresh the study sets after adding a flashcard
+      fetchStudySets(userInfo).then(setStudySets);
     } catch (error) {
       console.error("Error adding flashcard to study set:", error);
       alert(`Error adding flashcard to study set: ${error.message}`);
@@ -208,21 +148,9 @@ const Upload = () => {
 
   const handleDeleteFlashcard = async (flashcardId) => {
     try {
-      const response = await fetch("http://localhost:3000/delete-flashcard", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ flashcardId, user: userInfo }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
+      await deleteFlashcard(flashcardId, userInfo);
       alert("Flashcard deleted successfully");
-      fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after deletion
+      fetchSavedFlashcards(userInfo).then(setSavedFlashcards);
     } catch (error) {
       console.error("Error deleting flashcard:", error);
       alert(`Error deleting flashcard: ${error.message}`);
@@ -255,7 +183,7 @@ const Upload = () => {
       }
 
       alert("Flashcard updated successfully");
-      fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after updating
+      fetchSavedFlashcards(userInfo).then(setSavedFlashcards); // Refresh the saved flashcards after updating
       setEditMode(false);
       setEditFlashcard({ question: "", answer: "", _id: "" });
     } catch (error) {
@@ -320,13 +248,12 @@ const Upload = () => {
             Upload your course notes or paste them below to create a
             personalized study guide!
           </p>
-          <textarea
-            rows="10"
-            cols="40"
+          <TextArea
             value={notes}
             onChange={handleNotesChange}
             placeholder="Paste your notes here..."
-          ></textarea>
+            className="textarea-no-shadow"
+          />
           <p className="subtitle"> OR </p>
 
           <input
@@ -349,23 +276,12 @@ const Upload = () => {
           fetchSavedFlashcards={fetchSavedFlashcards}
         />
 
-        <div className="input-box">
-          <h3>Create Study Set</h3>
-          <input
-            type="text"
-            className="text"
-            value={newStudySetName}
-            onChange={(e) => setNewStudySetName(e.target.value)}
-            placeholder="Enter study set name"
-          />
-          <button
-            className="btn"
-            onClick={handleCreateStudySet}
-            disabled={!userInfo}
-          >
-            Create Study Set
-          </button>
-        </div>
+        <CreateStudySet
+          newStudySetName={newStudySetName}
+          setNewStudySetName={setNewStudySetName}
+          handleCreateStudySet={handleCreateStudySet}
+          userInfo={userInfo}
+        />
 
         <div className="input-box">
           <h3>Add Flashcard to Study Set</h3>
@@ -400,33 +316,11 @@ const Upload = () => {
           fetchFlashcardsInStudySet={fetchFlashcardsInStudySet}
         />
 
-        <div className="flashcard-container">
-          {flashcards.map((flashcard, index) => (
-            <div
-              key={index}
-              className="flashcard"
-              onClick={() => handleCardClick(index)}
-            >
-              <p>
-                {flashcard.showAnswer ? (
-                  <>
-                    <strong>Answer:</strong> {flashcard.answer}
-                  </>
-                ) : (
-                  <>
-                    <strong>Question:</strong> {flashcard.question}
-                  </>
-                )}
-              </p>
-              <button
-                className="save-btn"
-                onClick={() => handleSaveFlashcard(flashcard)}
-              >
-                Save Flashcard
-              </button>
-            </div>
-          ))}
-        </div>
+        <FlashcardList
+          flashcards={flashcards}
+          handleCardClick={handleCardClick}
+          handleSaveFlashcard={handleSaveFlashcard}
+        />
 
         <SavedFlashcards
           savedFlashcards={savedFlashcards}
@@ -439,30 +333,12 @@ const Upload = () => {
         />
 
         {editMode && (
-          <div className="edit-box">
-            <h3>Edit Flashcard</h3>
-            <textarea
-              rows="2"
-              cols="50"
-              value={editFlashcard.question}
-              onChange={(e) =>
-                setEditFlashcard({ ...editFlashcard, question: e.target.value })
-              }
-              placeholder="Edit question here..."
-            ></textarea>
-            <textarea
-              rows="2"
-              cols="50"
-              value={editFlashcard.answer}
-              onChange={(e) =>
-                setEditFlashcard({ ...editFlashcard, answer: e.target.value })
-              }
-              placeholder="Edit answer here..."
-            ></textarea>
-            <button className="btn" onClick={handleSaveEditFlashcard}>
-              Save Changes
-            </button>
-          </div>
+          <EditFlashcard
+            editFlashcard={editFlashcard}
+            setEditFlashcard={setEditFlashcard}
+            handleSaveEditFlashcard={handleSaveEditFlashcard}
+            setEditMode={setEditMode}
+          />
         )}
       </div>
     </div>
