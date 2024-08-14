@@ -88,3 +88,93 @@ export const addFlashcardToStudySet = async (flashcardId, studySetId) => {
         throw error;
     }
 };
+
+export const startStudySession = async (studySetId, userId) => {
+    try {
+        const response = await fetch("http://localhost:3000/start-study-session", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ studySetId, userId }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error starting study session:", error);
+        throw error;
+    }
+};
+
+export const updateStudyProgress = async (sessionId, flashcardId, status) => {
+    try {
+        const response = await fetch("http://localhost:3000/update-study-progress", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sessionId, flashcardId, status }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating study progress:", error);
+        throw error;
+    }
+};
+
+export const completeStudySession = async (sessionId) => {
+    try {
+        const response = await fetch("http://localhost:3000/complete-study-session", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sessionId }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error completing study session:", error);
+        throw error;
+    }
+};
+
+export const getStudySessionsForSet = async (studySetId, userId) => {
+    try {
+        const response = await fetch(
+            `http://localhost:3000/get-study-sessions-for-set?studySetId=${studySetId}&userId=${userId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            }
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching study sessions:", error);
+        throw error;
+    }
+};

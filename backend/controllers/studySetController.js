@@ -1,3 +1,5 @@
+const StudySession = require('../models/StudySession');
+const Flashcard = require('../models/Flashcard');
 const StudySetService = require('../services/studySetService');
 
 exports.createStudySet = async (req, res) => {
@@ -36,6 +38,38 @@ exports.viewStudySet = async (req, res) => {
 
 exports.deleteStudySet = async (req, res) => {
     const result = await StudySetService.deleteStudySet(req);
+    if (result.error) {
+        return res.status(404).json({ error: result.error });
+    }
+    return res.status(200).json(result);
+};
+
+exports.startStudySession = async (req, res) => {
+    const result = await StudySetService.startStudySession(req);
+    if (result.error) {
+        return res.status(404).json({ error: result.error });
+    }
+    return res.status(200).json(result);
+};
+
+exports.updateStudyProgress = async (req, res) => {
+    const result = await StudySetService.updateStudyProgress(req);
+    if (result.error) {
+        return res.status(404).json({ error: result.error });
+    }
+    return res.status(200).json(result);
+};
+
+exports.completeStudySession = async (req, res) => {
+    const result = await StudySetService.completeStudySession(req);
+    if (result.error) {
+        return res.status(404).json({ error: result.error });
+    }
+    return res.status(200).json(result);
+};
+
+exports.getStudySessionsForSet = async (req, res) => {
+    const result = await StudySetService.getStudySessionsForSet(req);
     if (result.error) {
         return res.status(404).json({ error: result.error });
     }

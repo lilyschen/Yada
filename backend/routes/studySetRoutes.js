@@ -6,6 +6,12 @@ router.post('/create-study-set', studySetController.createStudySet);
 router.post('/add-flashcard-to-study-set', studySetController.addFlashcardToStudySet);
 router.post('/fetch-study-sets', studySetController.fetchStudySets);
 router.post('/view-study-set', studySetController.viewStudySet);
-router.delete('/delete-study-set', StudySetController.deleteStudySet);
+router.delete('/delete-study-set', studySetController.deleteStudySet);
+
+// study session routes
+router.post('/start-study-session', studySetController.startStudySession);
+router.post('/update-study-progress', studySetController.updateStudyProgress);
+router.post('/complete-study-session', studySetController.completeStudySession);
+router.get('/study-sessions', studySetController.getStudySessionsForSet);
 
 module.exports = router;
