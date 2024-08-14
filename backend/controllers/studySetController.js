@@ -33,3 +33,11 @@ exports.viewStudySet = async (req, res) => {
     }
     return res.status(200).json(result);
 };
+
+exports.deleteStudySet = async (req, res) => {
+    const result = await StudySetService.deleteStudySet(req);
+    if (result.error) {
+        return res.status(404).json({ error: result.error });
+    }
+    return res.status(200).json(result);
+};

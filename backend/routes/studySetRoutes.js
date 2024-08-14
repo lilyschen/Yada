@@ -6,5 +6,6 @@ router.post('/create-study-set', studySetController.createStudySet);
 router.post('/add-flashcard-to-study-set', studySetController.addFlashcardToStudySet);
 router.post('/fetch-study-sets', studySetController.fetchStudySets);
 router.post('/view-study-set', studySetController.viewStudySet);
+router.delete('/delete-study-set', StudySetController.deleteStudySet);
 
 module.exports = router;
