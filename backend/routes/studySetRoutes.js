@@ -8,6 +8,8 @@ router.post('/fetch-study-sets', studySetController.fetchStudySets);
 router.post('/view-study-set', studySetController.viewStudySet);
 router.delete('/delete-study-set', studySetController.deleteStudySet);
 
+router.get('/study-set/:studySetId', studySetController.getStudySetById);
+
 // study session routes
 router.post('/start-study-session', studySetController.startStudySession);
 router.post('/update-study-progress', studySetController.updateStudyProgress);

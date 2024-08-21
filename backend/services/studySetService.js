@@ -43,3 +43,13 @@ exports.viewStudySet = async (req) => {
 
     return studySet.flashcards;
 };
+
+exports.getStudySetById = async (studySetId) => {
+    try {
+        const studySet = await StudySet.findById(studySetId).populate('flashcards');
+        return studySet;
+    } catch (error) {
+        console.error('Error fetching study set by ID:', error);
+        throw error;
+    }
+};

@@ -44,6 +44,20 @@ exports.deleteStudySet = async (req, res) => {
     return res.status(200).json(result);
 };
 
+exports.getStudySetById = async (req, res) => {
+    try {
+        const { studySetId } = req.params;
+        const studySet = await StudySetService.getStudySetById(studySetId);
+        if (!studySet) {
+            return res.status(404).json({ error: 'Study set not found' });
+        }
+        res.json({ name: studySet.name, flashcards: studySet.flashcards });
+    } catch (error) {
+        console.error('Error fetching study set:', error);
+        res.status(500).json({ error: 'Error fetching study set' });
+    }
+};
+
 exports.startStudySession = async (req, res) => {
     const result = await StudySetService.startStudySession(req);
     if (result.error) {

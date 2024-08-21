@@ -11,7 +11,7 @@ const SloganText = ({ isAuthenticated, user, loginWithRedirect, handleNavigate }
       <>
         <p className="subtitle">Welcome, {user.name}</p>
         <button className="upload-btn" onClick={handleNavigate}>
-          Upload Your Notes
+          Start Studying
         </button>
       </>
     )}

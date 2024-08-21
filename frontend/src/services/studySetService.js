@@ -178,3 +178,25 @@ export const getStudySessionsForSet = async (studySetId, userId) => {
         throw error;
     }
 };
+
+export const fetchFlashcardsInStudySet = async (studySetId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/study-set/${studySetId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching study set flashcards:", error);
+      throw error;
+    }
+  };

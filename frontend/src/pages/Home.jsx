@@ -12,7 +12,8 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate("/upload");
+    // navigate("/upload");
+    navigate("/study-sets");
   };
 
   const handleLogin = async () => {
