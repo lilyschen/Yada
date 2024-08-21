@@ -1,5 +1,6 @@
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { Link } from "react-router-dom";
 import LogoutButton from "./LogoutButton";
 
 const Nav = () => {
@@ -8,7 +9,9 @@ const Nav = () => {
   return (
     <nav className="navbar">
       <div className="logo-container">
-        <img className="logo" src="./yada-logo.png" alt="Yada logo" />
+        <Link to="/">
+          <img className="logo" src="./yada-logo.png" alt="Yada logo" />
+        </Link>
       </div>
       {isAuthenticated && (
         <div className="logout-container">

@@ -20,7 +20,7 @@ const FlashcardList = ({ flashcards, handleCardClick, handleSaveFlashcard }) => 
               </>
             )}
           </p>
-          <button
+          {/* <button
             className="save-btn"
             onClick={(e) => {
               e.stopPropagation(); // Prevent triggering handleCardClick
@@ -28,7 +28,7 @@ const FlashcardList = ({ flashcards, handleCardClick, handleSaveFlashcard }) => 
             }}
           >
             Save Flashcard
-          </button>
+          </button> */}
         </div>
       ))}
     </div>

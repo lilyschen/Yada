@@ -19,12 +19,25 @@ const StudySetDetailPage = () => {
     fetchStudySetDetails();
   }, [studySetId]);
 
+  const handleCardClick = (index) => {
+    setFlashcards((prevFlashcards) =>
+      prevFlashcards.map((flashcard, i) =>
+        i === index
+          ? { ...flashcard, showAnswer: !flashcard.showAnswer }
+          : flashcard
+      )
+    );
+  };
+
   return (
     <div className="overlay">
       <Nav />
       <div className="study-set-detail-page">
         <h2>{studySetName}</h2>
-        <FlashcardList flashcards={flashcards} />
+        <FlashcardList 
+          flashcards={flashcards} 
+          handleCardClick={handleCardClick} 
+        />
       </div>
     </div>
   );
