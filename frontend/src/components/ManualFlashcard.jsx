@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const ManualFlashcard = ({ userInfo, fetchSavedFlashcards }) => {
+const ManualFlashcard = ({ userInfo }) => {
   const [manualQuestion, setManualQuestion] = useState('');
   const [manualAnswer, setManualAnswer] = useState('');
 
@@ -25,7 +25,7 @@ const ManualFlashcard = ({ userInfo, fetchSavedFlashcards }) => {
       }
 
       alert('Flashcard created successfully');
-      fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after creating a new one
+      // fetchSavedFlashcards(userInfo); // Refresh the saved flashcards after creating a new one
       setManualQuestion('');
       setManualAnswer('');
     } catch (error) {
