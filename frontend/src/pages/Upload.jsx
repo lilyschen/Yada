@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import SavedFlashcards from "../components/SavedFlashcards";
 import ManualFlashcard from "../components/ManualFlashcard";
-import StudySets from "../components/StudySets";
 import Nav from "../components/nav/NavBar";
 import TextArea from "../components/TextArea";
 import EditFlashcard from "../components/EditFlashcard";
@@ -10,12 +9,12 @@ import FlashcardList from "../components/FlashcardList";
 import CreateStudySet from "../components/CreateStudySet";
 import {
   fetchSavedFlashcards,
-  deleteFlashcard
+  deleteFlashcard,
 } from "../services/flashcardService";
 import {
   fetchStudySets,
   createStudySet,
-  addFlashcardToStudySet
+  addFlashcardToStudySet,
 } from "../services/studySetService";
 
 const Upload = () => {
@@ -309,12 +308,6 @@ const Upload = () => {
             Add Flashcard to Study Set
           </button>
         </div>
-
-        <StudySets
-          studySets={studySets}
-          handleSelectStudySet={handleSelectStudySet}
-          fetchFlashcardsInStudySet={fetchFlashcardsInStudySet}
-        />
 
         <FlashcardList
           flashcards={flashcards}

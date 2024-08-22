@@ -25,7 +25,6 @@ const StudySets = ({ studySets }) => {
 
 export default StudySets;
 
-
 // const StudySets = ({ studySets, handleSelectStudySet, fetchFlashcardsInStudySet }) => {
 //     return (
 //       <div className="studysets-container">
@@ -47,6 +46,5 @@ export default StudySets;
 //       </div>
 //     );
 //   };
-  
+
 //   export default StudySets;
-  
