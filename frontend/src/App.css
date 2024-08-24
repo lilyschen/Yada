@@ -40,7 +40,6 @@ body {
   overflow-y: auto; /* Ensure vertical scrolling is enabled */
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   background-color: var(--bg-shade);
 }
@@ -298,4 +297,50 @@ select {
 
 h3 {
   margin: 10px 0;
+}
+
+.studysets-page {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 100px;
+  width: 100%;
+  height: 100vh;
+  background-color: var(--primary);
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.studysets-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.studysets-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.studyset-button {
+  background-color: var(--white);
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: var(--heading-color);
+  border-width: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.create-study-set-box {
+  background-color: var(--white);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  height: 25vh;
 }

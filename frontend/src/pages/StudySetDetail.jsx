@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchFlashcardsInStudySet, addFlashcardToStudySet } from "../services/studySetService";
+import {
+  fetchFlashcardsInStudySet,
+  addFlashcardToStudySet,
+} from "../services/studySetService";
 import FlashcardList from "../components/FlashcardList";
 import Nav from "../components/nav/NavBar";
 import TextArea from "../components/TextArea";
@@ -79,7 +82,10 @@ const StudySetDetailPage = () => {
       }
 
       const data = await response.json();
-      setFlashcards((prevFlashcards) => [...prevFlashcards, ...data.flashcards]);
+      setFlashcards((prevFlashcards) => [
+        ...prevFlashcards,
+        ...data.flashcards,
+      ]);
       setFile(null);
       setNotes("");
     } catch (error) {
@@ -115,11 +121,10 @@ const StudySetDetailPage = () => {
         throw new Error(errorText);
       }
 
-      const savedFlashcard = await response.json(); 
+      const savedFlashcard = await response.json();
 
       // Step 2: Add the saved flashcard to the study set
       await handleAddFlashcardToStudySet(savedFlashcard._id, studySetId);
-
     } catch (error) {
       console.error("Error saving manual flashcard:", error);
       alert(`Error saving manual flashcard: ${error.message}`);
@@ -134,7 +139,8 @@ const StudySetDetailPage = () => {
 
         <div className="input-box">
           <p className="subtitle">
-            Upload your course notes or paste them below to add more flashcards to this study set!
+            Upload your course notes or paste them below to add more flashcards
+            to this study set!
           </p>
           <TextArea
             value={notes}
@@ -149,18 +155,12 @@ const StudySetDetailPage = () => {
             accept="application/pdf"
             onChange={handleFileChange}
           />
-          <button
-            className="btn"
-            onClick={handleGenerateFlashcards}
-          >
+          <button className="btn" onClick={handleGenerateFlashcards}>
             Generate Flashcards
           </button>
         </div>
 
-        <ManualFlashcard
-          userInfo={user}
-          onSave={handleManualFlashcardSave}
-        />
+        <ManualFlashcard userInfo={user} onSave={handleManualFlashcardSave} />
 
         <FlashcardList
           flashcards={flashcards}

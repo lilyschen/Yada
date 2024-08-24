@@ -10,10 +10,13 @@ const StudySets = ({ studySets }) => {
   return (
     <div className="studysets-container">
       <h3>Your Study Sets</h3>
-      <ul>
+      <ul className="studysets-list">
         {studySets.map((set) => (
           <li key={set._id}>
-            <button onClick={() => handleStudySetClick(set._id)}>
+            <button
+              onClick={() => handleStudySetClick(set._id)}
+              className="studyset-button"
+            >
               {set.name}
             </button>
           </li>
