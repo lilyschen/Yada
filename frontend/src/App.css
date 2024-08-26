@@ -398,7 +398,8 @@ h3 {
   transform: scale(1.05);
 }
 
-.navigation-buttons {
+.navigation-buttons,
+.progress-buttons {
   display: flex;
   gap: 10px;
 }
@@ -419,4 +420,22 @@ h3 {
 
 .navigation-buttons button:hover:not(:disabled) {
   background-color: var(--highlight-hover);
+}
+
+.correct-button {
+  padding: 10px 20px;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: rgb(139, 209, 139);
+}
+
+.incorrect-button {
+  padding: 10px 20px;
+  background-color: rgb(237, 141, 141);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
