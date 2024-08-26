@@ -9,6 +9,7 @@ import Nav from "../components/nav/NavBar";
 import ManualFlashcard from "../components/ManualFlashcard";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadNotes from "../components/UploadNotes";
+import { useNavigate } from "react-router-dom";
 
 const StudySetDetailPage = () => {
   const { studySetId } = useParams();
@@ -18,6 +19,7 @@ const StudySetDetailPage = () => {
   const { user, isAuthenticated } = useAuth0();
   const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false); // State to control edit mode
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -98,6 +100,12 @@ const StudySetDetailPage = () => {
     setEditMode((prevMode) => !prevMode);
   };
 
+  const handleStartSession = () => {
+    navigate(`/study-set/${studySetId}/study-session`, {
+      state: { flashcards },
+    });
+  };
+
   return (
     <div className="overlay">
       <Nav />
@@ -111,6 +119,12 @@ const StudySetDetailPage = () => {
         <button className="get-started-btn" onClick={toggleEditMode}>
           {editMode ? "Cancel Edit" : "Edit"}
         </button>
+
+        <div>
+          <button onClick={handleStartSession} className="btn">
+            Start a Session
+          </button>
+        </div>
 
         {editMode && (
           <>
