@@ -250,6 +250,9 @@ textarea {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-width: 20vh;
+  justify-content: center;
+  text-align: center;
 }
 
 .manual-flashcard-box {
@@ -343,4 +346,16 @@ h3 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   height: 25vh;
+}
+
+.study-set-detail-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.edit-container {
+  display: flex;
+  flex-direction: row;
 }

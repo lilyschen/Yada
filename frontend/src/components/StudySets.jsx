@@ -21,6 +21,14 @@ const StudySets = ({ studySets }) => {
             </button>
           </li>
         ))}
+        <li>
+          <button
+            onClick={() => handleStudySetClick("test")}
+            className="studyset-button"
+          >
+            Placeholder
+          </button>
+        </li>
       </ul>
     </div>
   );

@@ -1,8 +1,13 @@
-import React from 'react';
+import React from "react";
 
-const FlashcardList = ({ flashcards, handleCardClick, handleSaveFlashcard }) => {
+const FlashcardList = ({
+  flashcards,
+  handleCardClick,
+  handleSaveFlashcard,
+}) => {
   return (
     <div className="flashcard-container">
+      <h2>Flashcards</h2>
       {flashcards.map((flashcard, index) => (
         <div
           key={index}

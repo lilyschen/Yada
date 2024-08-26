@@ -6,18 +6,18 @@ import {
 } from "../services/studySetService";
 import FlashcardList from "../components/FlashcardList";
 import Nav from "../components/nav/NavBar";
-import TextArea from "../components/TextArea";
 import ManualFlashcard from "../components/ManualFlashcard";
 import { useAuth0 } from "@auth0/auth0-react";
+import UploadNotes from "../components/UploadNotes";
 
 const StudySetDetailPage = () => {
   const { studySetId } = useParams();
   const [flashcards, setFlashcards] = useState([]);
   const [studySetName, setStudySetName] = useState("");
   const [notes, setNotes] = useState("");
-  const [file, setFile] = useState(null);
   const { user, isAuthenticated } = useAuth0();
   const [userInfo, setUserInfo] = useState(null);
+  const [editMode, setEditMode] = useState(false); // State to control edit mode
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -34,9 +34,14 @@ const StudySetDetailPage = () => {
 
   useEffect(() => {
     const fetchStudySetDetails = async () => {
-      const studySetData = await fetchFlashcardsInStudySet(studySetId);
-      setFlashcards(studySetData.flashcards);
-      setStudySetName(studySetData.name);
+      try {
+        const studySetData = await fetchFlashcardsInStudySet(studySetId);
+        setFlashcards(studySetData.flashcards);
+        setStudySetName(studySetData.name);
+      } catch (err) {
+        console.error("Error fetching study set:", err);
+        alert("Error fetching study set. Please try again later."); // Set error message
+      }
     };
 
     fetchStudySetDetails();
@@ -50,48 +55,6 @@ const StudySetDetailPage = () => {
           : flashcard
       )
     );
-  };
-
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
-
-  const handleNotesChange = (event) => {
-    setNotes(event.target.value);
-  };
-
-  const handleGenerateFlashcards = async () => {
-    const formData = new FormData();
-    formData.append("notes", notes);
-    if (file) {
-      formData.append("pdf", file);
-    }
-
-    try {
-      const response = await fetch(
-        "http://localhost:3000/generate-flashcards",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
-      const data = await response.json();
-      setFlashcards((prevFlashcards) => [
-        ...prevFlashcards,
-        ...data.flashcards,
-      ]);
-      setFile(null);
-      setNotes("");
-    } catch (error) {
-      console.error("Error generating flashcards:", error);
-      alert(`Error generating flashcards: ${error.message}`);
-    }
   };
 
   const handleAddFlashcardToStudySet = async (flashcardId, studySetId) => {
@@ -131,41 +94,40 @@ const StudySetDetailPage = () => {
     }
   };
 
+  const toggleEditMode = () => {
+    setEditMode((prevMode) => !prevMode);
+  };
+
   return (
     <div className="overlay">
       <Nav />
       <div className="study-set-detail-page">
         <h2>{studySetName}</h2>
 
-        <div className="input-box">
-          <p className="subtitle">
-            Upload your course notes or paste them below to add more flashcards
-            to this study set!
-          </p>
-          <TextArea
-            value={notes}
-            onChange={handleNotesChange}
-            placeholder="Paste your notes here..."
-            className="textarea-no-shadow"
-          />
-          <p className="subtitle"> OR </p>
-          <input
-            type="file"
-            className="file-input"
-            accept="application/pdf"
-            onChange={handleFileChange}
-          />
-          <button className="btn" onClick={handleGenerateFlashcards}>
-            Generate Flashcards
-          </button>
-        </div>
-
-        <ManualFlashcard userInfo={user} onSave={handleManualFlashcardSave} />
-
         <FlashcardList
           flashcards={flashcards}
           handleCardClick={handleCardClick}
         />
+        <button className="get-started-btn" onClick={toggleEditMode}>
+          {editMode ? "Cancel Edit" : "Edit"}
+        </button>
+
+        {editMode && (
+          <>
+            <div className="edit-container">
+              <UploadNotes
+                notes={notes}
+                setNotes={setNotes}
+                setFlashcards={setFlashcards}
+              />
+
+              <ManualFlashcard
+                userInfo={user}
+                onSave={handleManualFlashcardSave}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
