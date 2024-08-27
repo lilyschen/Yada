@@ -10,26 +10,22 @@ const StudySets = ({ studySets }) => {
   return (
     <div className="studysets-container">
       <h3>Your Study Sets</h3>
-      <ul className="studysets-list">
-        {studySets.map((set) => (
-          <li key={set._id}>
-            <button
-              onClick={() => handleStudySetClick(set._id)}
-              className="studyset-button"
-            >
-              {set.name}
-            </button>
-          </li>
-        ))}
-        <li>
-          <button
-            onClick={() => handleStudySetClick("test")}
-            className="studyset-button"
-          >
-            Placeholder
-          </button>
-        </li>
-      </ul>
+      {studySets.length > 0 ? (
+        <ul className="studysets-list">
+          {studySets.map((set) => (
+            <li key={set._id}>
+              <button
+                onClick={() => handleStudySetClick(set._id)}
+                className="studyset-button"
+              >
+                {set.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Create a new study set to get started!</p>
+      )}
     </div>
   );
 };
