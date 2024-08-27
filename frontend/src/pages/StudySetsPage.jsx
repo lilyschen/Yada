@@ -22,6 +22,7 @@ const StudySetsPage = () => {
           sub: user.sub,
           email: user.email,
         };
+        setUserInfo(userInfo);
         const sets = await fetchStudySets(userInfo);
         setStudySets(sets);
       }
@@ -39,6 +40,8 @@ const StudySetsPage = () => {
       alert("Please enter a study set name");
       return;
     }
+
+    console.log("Creating study set with:", newStudySetName, userInfo);
 
     try {
       await createStudySet(newStudySetName, userInfo);
