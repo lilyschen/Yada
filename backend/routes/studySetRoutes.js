@@ -7,6 +7,7 @@ router.post('/add-flashcard-to-study-set', studySetController.addFlashcardToStud
 router.post('/fetch-study-sets', studySetController.fetchStudySets);
 router.post('/view-study-set', studySetController.viewStudySet);
 router.delete('/delete-study-set', studySetController.deleteStudySet);
+router.put('/update-study-set-name', studySetController.updateStudySetName);
 
 router.get('/study-set/:studySetId', studySetController.getStudySetById);
 

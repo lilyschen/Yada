@@ -53,3 +53,27 @@ exports.getStudySetById = async (studySetId) => {
         throw error;
     }
 };
+
+exports.updateStudySetName = async (req) => {
+    const { studySetId, newName, user } = req.body;
+    const userId = user ? user.sub : 'defaultUser';
+
+    // Check if the study set exists and belongs to the user
+    const studySet = await StudySet.findOne({ _id: studySetId, userId });
+    if (!studySet) {
+        return { error: 'Study set not found' };
+    }
+
+    // Check if the new name is already taken by another study set for the same user
+    const existingStudySet = await StudySet.findOne({ name: newName, userId });
+    if (existingStudySet) {
+        return { error: 'Another study set with this name already exists' };
+    }
+
+    // Update the study set name
+    studySet.name = newName;
+    await studySet.save();
+
+    return { message: 'Study set name updated successfully', studySet };
+};
+

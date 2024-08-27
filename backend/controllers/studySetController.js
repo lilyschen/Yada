@@ -58,6 +58,14 @@ exports.getStudySetById = async (req, res) => {
     }
 };
 
+exports.updateStudySetName = async (req, res) => {
+    const result = await StudySetService.updateStudySetName(req);
+    if (result.error) {
+        return res.status(400).json({ error: result.error });
+    }
+    return res.status(200).json(result);
+};
+
 // exports.startStudySession = async (req, res) => {
 //     const result = await StudySetService.startStudySession(req);
 //     if (result.error) {
