@@ -11,7 +11,8 @@ const studySetRoutes = require('./routes/studySetRoutes');
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3001',
+    // origin: 'http://localhost:3001',
+    origin: '*', // allow all origins
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
     optionsSuccessStatus: 200
