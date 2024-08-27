@@ -58,34 +58,114 @@ exports.getStudySetById = async (req, res) => {
     }
 };
 
-exports.startStudySession = async (req, res) => {
-    const result = await StudySetService.startStudySession(req);
-    if (result.error) {
-        return res.status(404).json({ error: result.error });
+// exports.startStudySession = async (req, res) => {
+//     const result = await StudySetService.startStudySession(req);
+//     if (result.error) {
+//         return res.status(404).json({ error: result.error });
+//     }
+//     return res.status(200).json(result);
+// };
+
+exports.startStudySession = async (req) => {
+    const { studySetId, user } = req.body;
+    const studySet = await StudySetService.getStudySetById(studySetId);
+    if (!studySet) {
+        return { error: 'Study set not found' };
     }
-    return res.status(200).json(result);
+
+    const studySession = new StudySession({
+        studySet: studySetId,
+        user: user.sub,
+        progress: studySet.flashcards.map(flashcard => ({
+            flashcard: flashcard._id,
+            status: 'unanswered',
+            attempts: 0
+        })),
+        completed: false
+    });
+
+    await studySession.save();
+    return { message: 'Study session started successfully', studySession };
 };
 
-exports.updateStudyProgress = async (req, res) => {
-    const result = await StudySetService.updateStudyProgress(req);
-    if (result.error) {
-        return res.status(404).json({ error: result.error });
+// exports.updateStudyProgress = async (req, res) => {
+//     const result = await StudySetService.updateStudyProgress(req);
+//     if (result.error) {
+//         return res.status(404).json({ error: result.error });
+//     }
+//     return res.status(200).json(result);
+// };
+
+exports.updateStudyProgress = async (req) => {
+    const { studySessionId, flashcardId, status } = req.body;
+
+    const studySession = await StudySession.findById(studySessionId);
+    if (!studySession) {
+        return { error: 'Study session not found' };
     }
-    return res.status(200).json(result);
+
+    const progressEntry = studySession.progress.find(entry => entry.flashcard.toString() === flashcardId);
+    if (!progressEntry) {
+        return { error: 'Flashcard not found in study session' };
+    }
+
+    progressEntry.status = status;
+    progressEntry.attempts += 1;
+    studySession.updatedAt = Date.now();
+
+    await studySession.save();
+    return { message: 'Study progress updated successfully', studySession };
 };
 
-exports.completeStudySession = async (req, res) => {
-    const result = await StudySetService.completeStudySession(req);
-    if (result.error) {
-        return res.status(404).json({ error: result.error });
+
+// exports.completeStudySession = async (req, res) => {
+//     const result = await StudySetService.completeStudySession(req);
+//     if (result.error) {
+//         return res.status(404).json({ error: result.error });
+//     }
+//     return res.status(200).json(result);
+// };
+
+exports.completeStudySession = async (req) => {
+    const { studySessionId } = req.body;
+
+    const studySession = await StudySession.findById(studySessionId);
+    if (!studySession) {
+        return { error: 'Study session not found' };
     }
-    return res.status(200).json(result);
+
+    studySession.completed = true;
+    studySession.updatedAt = Date.now();
+
+    const correctCount = studySession.progress.filter(entry => entry.status === 'correct').length;
+    const totalCount = studySession.progress.length;
+
+    await studySession.save();
+    return { message: 'Study session completed successfully', correctCount, totalCount, studySession };
 };
 
-exports.getStudySessionsForSet = async (req, res) => {
-    const result = await StudySetService.getStudySessionsForSet(req);
-    if (result.error) {
-        return res.status(404).json({ error: result.error });
+
+// exports.getStudySessionsForSet = async (req, res) => {
+//     const result = await StudySetService.getStudySessionsForSet(req);
+//     if (result.error) {
+//         return res.status(404).json({ error: result.error });
+//     }
+//     return res.status(200).json(result);
+// };
+
+exports.getStudySessionsForSet = async (req) => {
+    const { studySetId, user } = req.body;
+    const userId = user.sub;
+
+    const studySessions = await StudySession.find({ studySet: studySetId, user: userId })
+        .populate('studySet')
+        .populate('progress.flashcard')
+        .sort({ updatedAt: -1 });
+
+    if (!studySessions.length) {
+        return { error: 'No study sessions found' };
     }
-    return res.status(200).json(result);
+
+    return { message: 'Study sessions retrieved successfully', studySessions };
 };
+
