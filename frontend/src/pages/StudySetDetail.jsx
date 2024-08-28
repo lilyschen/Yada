@@ -8,6 +8,7 @@ import {
 import FlashcardList from "../components/FlashcardList";
 import Nav from "../components/nav/NavBar";
 import ManualFlashcard from "../components/ManualFlashcard";
+import Modal from "../components/Modal";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadNotes from "../components/UploadNotes";
 import { useNavigate } from "react-router-dom";
@@ -139,11 +140,13 @@ const StudySetDetailPage = () => {
           {showManualFlashcard ? "Cancel" : "Create Flashcard Manually"}
         </button>
 
-        {showManualFlashcard && ( 
-          <ManualFlashcard
-            userInfo={userInfo}
-            onSave={handleManualFlashcardSave}
-          />
+        {showManualFlashcard && (
+          <Modal onClose={toggleManualFlashcard}>
+            <ManualFlashcard
+              userInfo={userInfo}
+              onSave={handleManualFlashcardSave}
+            />
+          </Modal>
         )}
 
         {editMode && (
