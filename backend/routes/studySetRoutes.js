@@ -12,9 +12,9 @@ router.put('/update-study-set-name', studySetController.updateStudySetName);
 router.get('/study-set/:studySetId', studySetController.getStudySetById);
 
 // study session routes
-router.post('/start-study-session', studySetController.startStudySession);
-router.post('/update-study-progress', studySetController.updateStudyProgress);
-router.post('/complete-study-session', studySetController.completeStudySession);
-router.get('/study-sessions', studySetController.getStudySessionsForSet);
+router.post('/start-study-session', studySetController.startStudySession); 
+router.put('/update-study-progress', studySetController.updateStudyProgress);
+router.put('/complete-study-session', studySetController.completeStudySession);  
+router.get('/study-sessions', studySetController.getStudySessionsForSet);  
 
 module.exports = router;

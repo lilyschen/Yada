@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   fetchFlashcardsInStudySet,
   addFlashcardToStudySet,
+  startStudySession,
 } from "../services/studySetService";
 import FlashcardList from "../components/FlashcardList";
 import Nav from "../components/nav/NavBar";
@@ -18,7 +19,7 @@ const StudySetDetailPage = () => {
   const [notes, setNotes] = useState("");
   const { user, isAuthenticated } = useAuth0();
   const [userInfo, setUserInfo] = useState(null);
-  const [editMode, setEditMode] = useState(false); // State to control edit mode
+  const [editMode, setEditMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const StudySetDetailPage = () => {
         setStudySetName(studySetData.name);
       } catch (err) {
         console.error("Error fetching study set:", err);
-        alert("Error fetching study set. Please try again later."); // Set error message
+        alert("Error fetching study set. Please try again later.");
       }
     };
 
@@ -102,7 +103,7 @@ const StudySetDetailPage = () => {
 
   const handleStartSession = () => {
     navigate(`/study-set/${studySetId}/study-session`, {
-      state: { flashcards },
+      state: { flashcards, studySetId },
     });
   };
 

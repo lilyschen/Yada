@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const studySessionSchema = new mongoose.Schema({
     studySet: { type: mongoose.Schema.Types.ObjectId, ref: 'StudySet', required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: String, required: true },
     progress: [
         {
             flashcard: { type: mongoose.Schema.Types.ObjectId, ref: 'Flashcard', required: true },

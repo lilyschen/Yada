@@ -1,44 +1,69 @@
 import React, { useState, useEffect } from "react";
 import Nav from "../components/nav/NavBar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const StudySession = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, isLoading } = useAuth0(); 
   const flashcards = location.state?.flashcards || [];
+  const studySetId = location.state?.studySetId; 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionProgress, setSessionProgress] = useState([]);
+  const [studySessionId, setStudySessionId] = useState(null); 
+  const [loading, setLoading] = useState(false); 
 
-  // Fetch study session or initialize if it doesn't exist
   useEffect(() => {
-    const initializeSession = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/study-session",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              studySet: location.state?.studySetId, // assuming studySetId is passed in location state
-            }),
-          }
-        );
+    if (isAuthenticated && !isLoading) {
+      initializeSession();
+    }
+  }, [isAuthenticated, isLoading]); // Only call when authentication status is settled
 
-        if (!response.ok) {
-          throw new Error("Failed to initialize study session");
-        }
+  const initializeSession = async () => {
+    if (!isAuthenticated || isLoading || !studySetId) {
+      console.error("User is not authenticated or loading or missing studySetId");
+      return;
+    }
 
-        const data = await response.json();
-        setSessionProgress(data.progress || []);
-      } catch (error) {
-        console.error("Error initializing study session:", error);
+    setLoading(true); // Start loading
+
+    try {
+      console.log("Starting study session...");
+
+      const response = await fetch("http://localhost:3000/start-study-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studySetId: studySetId, 
+          user: { sub: user.sub },  
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Error starting study session:", response.statusText);
+        throw new Error("Failed to start study session");
       }
-    };
 
-    initializeSession();
-  }, [location.state]);
+      const data = await response.json();
+      setSessionProgress(data.studySession.progress || []);
+
+      if (data.studySession && data.studySession._id) {
+        setStudySessionId(data.studySession._id);
+        console.log(`Study session started with ID: ${data.studySession._id}`);
+      } else {
+        console.error("No studySessionId returned from API.");
+      }
+    } catch (error) {
+      console.error("Error starting study session:", error);
+      alert("Error starting study session. Please try again.");
+    } finally {
+      setLoading(false); // End loading
+    }
+  };
 
   const handleNextCard = () => {
     setIsFlipped(false); // Reset flip state
@@ -60,33 +85,86 @@ const StudySession = () => {
 
   const handleMarkAs = async (status) => {
     const flashcard = flashcards[currentCardIndex];
+  
+    if (!studySessionId) {
+      console.error("Missing studySessionId");  
+      return;
+    }
+    
+    if (!flashcard) {
+      console.error("No flashcard found at current index.");  
+      return;
+    }
+  
     try {
+      console.log(`Marking flashcard "${flashcard.question}" as ${status}.`);
+
       const response = await fetch(
-        "http://localhost:3000/api/study-session/update-progress",
+        `http://localhost:3000/update-study-progress`,
         {
-          method: "POST",
+          method: "PUT", 
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            studySet: location.state?.studySetId,
-            flashcard: flashcard._id,
+            studySessionId, 
+            flashcardId: flashcard._id, 
             status,
           }),
         }
       );
-
+  
       if (!response.ok) {
+        console.error("Error updating study session progress:", response.statusText);
         throw new Error("Failed to update study session progress");
       }
-
+  
       const updatedProgress = await response.json();
       setSessionProgress(updatedProgress.progress);
+
+      console.log(`Flashcard "${flashcard.question}" marked as ${status}.`);
     } catch (error) {
       console.error("Error updating study session progress:", error);
     }
+  
+    handleNextCard(); 
+  };
 
-    handleNextCard();
+  const handleEndSession = async () => {
+
+    if (!studySessionId) {
+      console.error("Missing studySessionId"); 
+      return;
+    }
+
+    try {
+      console.log("Ending study session...");
+
+      const response = await fetch(
+        `http://localhost:3000/complete-study-session`,  
+        {
+          method: "PUT",  
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ studySessionId }),  
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Error ending study session:", response.statusText);
+        throw new Error("Failed to end study session");
+      }
+
+      const result = await response.json();
+      console.log(`Study session has ended. ${result.correctCount} correct out of ${result.totalCount} flashcards.`);
+      
+      alert(`Session completed with ${result.correctCount} correct out of ${result.totalCount}`);
+      navigate("/"); 
+    } catch (error) {
+      console.error("Error ending study session:", error);
+      alert(`Error ending study session: ${error.message}`);
+    }
   };
 
   return (
@@ -129,6 +207,11 @@ const StudySession = () => {
             className="incorrect-button"
           >
             Incorrect
+          </button>
+        </div>
+        <div className="end-session-button">
+          <button onClick={handleEndSession} className="btn end-session">
+            End Session
           </button>
         </div>
       </div>
