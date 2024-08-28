@@ -190,19 +190,26 @@ const StudySetDetailPage = () => {
           </div>
         )}
 
-        <FlashcardList
-          flashcards={flashcards}
-          handleCardClick={handleCardClick}
-        />
-        <button className="get-started-btn" onClick={toggleEditMode}>
-          {editMode ? "Cancel Edit" : "Edit"}
-        </button>
-
-        <div>
-          <button onClick={handleStartSession} className="btn">
-            Start a Session
-          </button>
-        </div>
+        {flashcards.length > 0 ? (
+          <>
+            <FlashcardList
+              flashcards={flashcards}
+              handleCardClick={handleCardClick}
+            />
+            <button className="get-started-btn" onClick={toggleEditMode}>
+              {editMode ? "Cancel Edit" : "Edit"}
+            </button>
+            <div>
+              <button onClick={handleStartSession} className="btn">
+                Start a Session
+              </button>
+            </div>
+          </>
+        ) : (
+          <p>
+            You have not added any flashcards to {studySetName} yet. Please select an option below to generate flashcards!
+          </p>
+        )}
 
         <button className="btn" onClick={toggleManualFlashcard}>
           {showManualFlashcard ? "Cancel" : "Create Flashcard Manually"}

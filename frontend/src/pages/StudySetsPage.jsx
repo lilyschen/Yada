@@ -67,12 +67,11 @@ const StudySetsPage = () => {
           userInfo={userInfo}
         />
 
-        <div>
-          {/* Temporary button to navigate to upload page */}
+        {/* <div>
           <button onClick={() => navigate("/upload")} className="btn">
             Go to Upload Page
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
