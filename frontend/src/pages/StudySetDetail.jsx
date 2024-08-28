@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
   fetchFlashcardsInStudySet,
   addFlashcardToStudySet,
@@ -11,10 +11,10 @@ import ManualFlashcard from "../components/ManualFlashcard";
 import Modal from "../components/Modal";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadNotes from "../components/UploadNotes";
-import { useNavigate } from "react-router-dom";
 
 const StudySetDetailPage = () => {
   const { studySetId } = useParams();
+  const location = useLocation();
   const [flashcards, setFlashcards] = useState([]);
   const [studySetName, setStudySetName] = useState("");
   const [notes, setNotes] = useState("");
@@ -23,6 +23,7 @@ const StudySetDetailPage = () => {
   const [editMode, setEditMode] = useState(false);
   const [showManualFlashcard, setShowManualFlashcard] = useState(false);
   const navigate = useNavigate();
+  const [lastSessionResults, setLastSessionResults] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -51,6 +52,24 @@ const StudySetDetailPage = () => {
 
     fetchStudySetDetails();
   }, [studySetId]);
+
+  useEffect(() => {
+    // Check for last session results from location.state or local storage
+    const resultsFromState = location.state?.lastSessionResults;
+    const resultsFromStorage = localStorage.getItem(
+      `lastSessionResults_${studySetId}`
+    );
+
+    if (resultsFromState) {
+      setLastSessionResults(resultsFromState);
+      localStorage.setItem(
+        `lastSessionResults_${studySetId}`,
+        JSON.stringify(resultsFromState)
+      );
+    } else if (resultsFromStorage) {
+      setLastSessionResults(JSON.parse(resultsFromStorage));
+    }
+  }, [location.state, studySetId]);
 
   const handleCardClick = (index) => {
     setFlashcards((prevFlashcards) =>
@@ -121,6 +140,14 @@ const StudySetDetailPage = () => {
       <Nav />
       <div className="study-set-detail-page">
         <h2>{studySetName}</h2>
+
+        {/* Display last session results if available */}
+        {lastSessionResults && (
+          <div className="last-session-results">
+            <strong>Last Session:</strong> {lastSessionResults.correctCount} out of{" "}
+            {lastSessionResults.totalCount} correct
+          </div>
+        )}
 
         <FlashcardList
           flashcards={flashcards}

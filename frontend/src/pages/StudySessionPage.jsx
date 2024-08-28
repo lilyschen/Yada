@@ -85,17 +85,17 @@ const StudySession = () => {
 
   const handleMarkAs = async (status) => {
     const flashcard = flashcards[currentCardIndex];
-  
+
     if (!studySessionId) {
       console.error("Missing studySessionId");  
       return;
     }
-    
+
     if (!flashcard) {
       console.error("No flashcard found at current index.");  
       return;
     }
-  
+
     try {
       console.log(`Marking flashcard "${flashcard.question}" as ${status}.`);
 
@@ -113,12 +113,12 @@ const StudySession = () => {
           }),
         }
       );
-  
+
       if (!response.ok) {
         console.error("Error updating study session progress:", response.statusText);
         throw new Error("Failed to update study session progress");
       }
-  
+
       const updatedProgress = await response.json();
       setSessionProgress(updatedProgress.progress);
 
@@ -126,20 +126,19 @@ const StudySession = () => {
     } catch (error) {
       console.error("Error updating study session progress:", error);
     }
-  
+
     handleNextCard(); 
   };
 
   const handleEndSession = async () => {
-
     if (!studySessionId) {
       console.error("Missing studySessionId"); 
       return;
     }
-
+  
     try {
       console.log("Ending study session...");
-
+  
       const response = await fetch(
         `http://localhost:3000/complete-study-session`,  
         {
@@ -150,17 +149,27 @@ const StudySession = () => {
           body: JSON.stringify({ studySessionId }),  
         }
       );
-
+  
       if (!response.ok) {
         console.error("Error ending study session:", response.statusText);
         throw new Error("Failed to end study session");
       }
-
+  
       const result = await response.json();
-      console.log(`Study session has ended. ${result.correctCount} correct out of ${result.totalCount} flashcards.`);
-      
-      alert(`Session completed with ${result.correctCount} correct out of ${result.totalCount}`);
-      navigate("/"); 
+      console.log(
+        `Study session has ended. ${result.correctCount} correct out of ${result.totalCount} flashcards.`
+      );
+  
+      // Save to local storage for persistence
+      localStorage.setItem(
+        `lastSessionResults_${studySetId}`,
+        JSON.stringify(result)
+      );
+  
+      // Navigate back to the StudySetDetailPage with results in state
+      navigate(`/study-set/${studySetId}`, {
+        state: { lastSessionResults: result },
+      });
     } catch (error) {
       console.error("Error ending study session:", error);
       alert(`Error ending study session: ${error.message}`);
