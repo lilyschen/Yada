@@ -20,6 +20,7 @@ const StudySetDetailPage = () => {
   const { user, isAuthenticated } = useAuth0();
   const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [showManualFlashcard, setShowManualFlashcard] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,11 +61,10 @@ const StudySetDetailPage = () => {
     );
   };
 
-  const handleAddFlashcardToStudySet = async (flashcardId, studySetId) => {
+  const handleAddFlashcardToStudySet = async (flashcardId) => {
     try {
       await addFlashcardToStudySet(flashcardId, studySetId);
       alert("Flashcard added to study set successfully");
-      // fetchStudySets(userInfo).then(setStudySets);
     } catch (error) {
       console.error("Error adding flashcard to study set:", error);
       alert(`Error adding flashcard to study set: ${error.message}`);
@@ -73,13 +73,16 @@ const StudySetDetailPage = () => {
 
   const handleManualFlashcardSave = async (flashcard) => {
     try {
-      // Step 1: Save the flashcard
-      const response = await fetch("http://localhost:3000/save-flashcard", {
+      const response = await fetch("http://localhost:3000/create-flashcard", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ flashcard, user }),
+        body: JSON.stringify({
+          question: flashcard.question,
+          answer: flashcard.answer,
+          user: userInfo,
+        }),
       });
 
       if (!response.ok) {
@@ -89,8 +92,8 @@ const StudySetDetailPage = () => {
 
       const savedFlashcard = await response.json();
 
-      // Step 2: Add the saved flashcard to the study set
-      await handleAddFlashcardToStudySet(savedFlashcard._id, studySetId);
+      await handleAddFlashcardToStudySet(savedFlashcard.flashcard._id);
+      setShowManualFlashcard(false);
     } catch (error) {
       console.error("Error saving manual flashcard:", error);
       alert(`Error saving manual flashcard: ${error.message}`);
@@ -99,6 +102,11 @@ const StudySetDetailPage = () => {
 
   const toggleEditMode = () => {
     setEditMode((prevMode) => !prevMode);
+  };
+
+  const toggleManualFlashcard = () => {
+    console.log("Toggle Manual Flashcard clicked"); 
+    setShowManualFlashcard((prev) => !prev);
   };
 
   const handleStartSession = () => {
@@ -127,21 +135,25 @@ const StudySetDetailPage = () => {
           </button>
         </div>
 
-        {editMode && (
-          <>
-            <div className="edit-container">
-              <UploadNotes
-                notes={notes}
-                setNotes={setNotes}
-                setFlashcards={setFlashcards}
-              />
+        <button className="btn" onClick={toggleManualFlashcard}>
+          {showManualFlashcard ? "Cancel" : "Create Flashcard Manually"}
+        </button>
 
-              <ManualFlashcard
-                userInfo={user}
-                onSave={handleManualFlashcardSave}
-              />
-            </div>
-          </>
+        {showManualFlashcard && ( 
+          <ManualFlashcard
+            userInfo={userInfo}
+            onSave={handleManualFlashcardSave}
+          />
+        )}
+
+        {editMode && (
+          <div className="edit-container">
+            <UploadNotes
+              notes={notes}
+              setNotes={setNotes}
+              setFlashcards={setFlashcards}
+            />
+          </div>
         )}
       </div>
     </div>
