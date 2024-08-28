@@ -37,13 +37,18 @@ exports.generateFlashcards = async (req) => {
         };
 
         const flashcards = mockResponse.choices[0].text.trim().split('\n').reduce((acc, line) => {
-            if (line.startsWith('Q:')) {
-                acc.push({ question: line.slice(3).trim(), answer: '', showAnswer: false });
-            } else if (line.startsWith('A:') && acc.length > 0) {
-                acc[acc.length - 1].answer = line.slice(3).trim();
+            if (line.startsWith('Q:') || line.startsWith('Question')) {
+                acc.push({ question: line.slice(line.startsWith('Q:') ? 3 : 10).trim(), answer: '', showAnswer: false });
+            } else if ((line.startsWith('A:') || line.startsWith('Answer')) && acc.length > 0) {
+                acc[acc.length - 1].answer = line.slice(line.startsWith('A:') ? 3 : 7).trim();
             }
             return acc;
         }, []);
+
+        if (flashcards.length === 0) {
+            console.log('No flashcards generated.'); // Log 6
+            return { flashcards }; // Return an empty array
+        }
 
         // const response = await openaiClient.chat.completions.create({
         //     model: 'gpt-4',
@@ -76,6 +81,29 @@ exports.generateFlashcards = async (req) => {
         //     }
         //     return acc;
         // }, []);
+
+        // Save each generated flashcard to the database
+        for (const flashcard of flashcards) {
+            try {
+                const userId = req.body.user ? req.body.user.sub : 'defaultUser';
+                const userEmail = req.body.user ? req.body.user.email : 'defaultEmail';
+
+                const flashcardDoc = new Flashcard({
+                    question: flashcard.question,
+                    answer: flashcard.answer,
+                    userId,
+                    userEmail,
+                    showAnswer: flashcard.showAnswer
+                });
+
+                await flashcardDoc.save();
+                console.log(`Flashcard saved: ${flashcard.question}`); // Log 7
+            } catch (saveError) {
+                console.error('Error saving flashcard:', saveError); // Log 8
+                return { error: 'Error saving generated flashcards' };
+            }
+        }
+
 
         return { flashcards };
     } catch (error) {

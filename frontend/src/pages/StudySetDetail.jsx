@@ -9,6 +9,7 @@ import FlashcardList from "../components/FlashcardList";
 import Nav from "../components/nav/NavBar";
 import ManualFlashcard from "../components/ManualFlashcard";
 import Modal from "../components/Modal";
+import GenerateFlashcardsModal from "../components/GenerateFlashcardsModal";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadNotes from "../components/UploadNotes";
 
@@ -22,6 +23,7 @@ const StudySetDetailPage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [showManualFlashcard, setShowManualFlashcard] = useState(false);
+  const [showGenerateFlashcardsModal, setShowGenerateFlashcardsModal] = useState(false);
   const navigate = useNavigate();
   const [lastSessionResults, setLastSessionResults] = useState(null);
 
@@ -85,6 +87,9 @@ const StudySetDetailPage = () => {
     try {
       await addFlashcardToStudySet(flashcardId, studySetId);
       alert("Flashcard added to study set successfully");
+      // Refresh flashcards after adding a new one
+      const studySetData = await fetchFlashcardsInStudySet(studySetId);
+      setFlashcards(studySetData.flashcards);
     } catch (error) {
       console.error("Error adding flashcard to study set:", error);
       alert(`Error adding flashcard to study set: ${error.message}`);
@@ -125,8 +130,44 @@ const StudySetDetailPage = () => {
   };
 
   const toggleManualFlashcard = () => {
-    console.log("Toggle Manual Flashcard clicked"); 
+    console.log("Toggle Manual Flashcard clicked");
     setShowManualFlashcard((prev) => !prev);
+  };
+
+  const toggleGenerateFlashcardsModal = () => {
+    setShowGenerateFlashcardsModal((prev) => !prev);
+  };
+
+  const handleFlashcardsGenerated = async (newFlashcards) => {
+    try {
+      // Add each generated flashcard to the study set
+      for (const flashcard of newFlashcards) {
+        const response = await fetch("http://localhost:3000/create-flashcard", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: flashcard.question,
+            answer: flashcard.answer,
+            user: userInfo,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText);
+        }
+
+        const savedFlashcard = await response.json();
+        await handleAddFlashcardToStudySet(savedFlashcard.flashcard._id);
+      }
+    } catch (error) {
+      console.error("Error generating flashcards:", error);
+      alert(`Error generating flashcards: ${error.message}`);
+    } finally {
+      setShowGenerateFlashcardsModal(false); // Close modal after flashcards are added
+    }
   };
 
   const handleStartSession = () => {
@@ -167,6 +208,10 @@ const StudySetDetailPage = () => {
           {showManualFlashcard ? "Cancel" : "Create Flashcard Manually"}
         </button>
 
+        <button className="btn" onClick={toggleGenerateFlashcardsModal}>
+          {showGenerateFlashcardsModal ? "Cancel" : "Generate Flashcards"}
+        </button>
+
         {showManualFlashcard && (
           <Modal onClose={toggleManualFlashcard}>
             <ManualFlashcard
@@ -174,6 +219,14 @@ const StudySetDetailPage = () => {
               onSave={handleManualFlashcardSave}
             />
           </Modal>
+        )}
+
+        {showGenerateFlashcardsModal && (
+          <GenerateFlashcardsModal
+            onClose={toggleGenerateFlashcardsModal}
+            userInfo={userInfo}
+            onFlashcardsGenerated={handleFlashcardsGenerated} 
+          />
         )}
 
         {editMode && (
