@@ -66,6 +66,23 @@ nav .logo-container .logo {
   margin-right: 20px;
 }
 
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 50px; 
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #000000; 
+  font-weight: bold;
+  font-size: 19px;
+}
+
+.nav-link:hover {
+  color: #41cde0; 
+}
+
 /* Homepage Styling */
 .homepage {
   display: flex;

@@ -14,8 +14,13 @@ const Nav = () => {
         </Link>
       </div>
       {isAuthenticated && (
-        <div className="logout-container">
-          <LogoutButton />
+        <div className="nav-links">
+          <Link to="/study-sets" className="nav-link">
+            My Sets
+          </Link>
+          <div className="logout-container">
+            <LogoutButton />
+          </div>
         </div>
       )}
     </nav>
