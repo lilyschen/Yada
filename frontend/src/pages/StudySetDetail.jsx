@@ -180,7 +180,7 @@ const StudySetDetailPage = () => {
 
   const handleDeleteFlashcard = async (flashcardId) => {
     try {
-      await deleteFlashcard();
+      await deleteFlashcard( flashcardId, userInfo );
       setFlashcards(
         flashcards.filter((flashcard) => flashcard._id !== flashcardId)
       );
