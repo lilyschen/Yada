@@ -69,18 +69,18 @@ nav .logo-container .logo {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 50px; 
+  gap: 50px;
 }
 
 .nav-link {
   text-decoration: none;
-  color: #000000; 
+  color: #000000;
   font-weight: bold;
   font-size: 19px;
 }
 
 .nav-link:hover {
-  color: #41cde0; 
+  color: #41cde0;
 }
 
 /* Homepage Styling */
@@ -267,7 +267,6 @@ textarea {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  min-width: 20vh;
   justify-content: center;
   text-align: center;
 }
@@ -367,9 +366,16 @@ h3 {
 
 .study-set-detail-page {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
-  gap: 20px;
+  gap: 50px;
+}
+
+.study-set-options {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .edit-container {
@@ -409,6 +415,21 @@ h3 {
   transition: transform 0.3s ease; /* Smooth flipping animation */
   margin-bottom: 20px;
   padding: 20px;
+  gap: 20px;
+}
+
+.delete-btn {
+  max-width: 5vh;
+  max-height: 5vh;
+  cursor: pointer;
+  background-color: rgba(188, 47, 47, 0.315);
+  border: none;
+  border-radius: 4px;
+  padding: 2px;
+}
+.delete-img {
+  width: 60%;
+  height: 60%;
 }
 
 .flashcard:hover {
@@ -463,7 +484,7 @@ h3 {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7); 
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -474,8 +495,8 @@ h3 {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 400px; 
-  max-height: 80vh; 
+  width: 400px;
+  max-height: 80vh;
   overflow-y: auto;
   position: relative;
 }

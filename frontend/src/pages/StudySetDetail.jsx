@@ -12,6 +12,7 @@ import Modal from "../components/Modal";
 import GenerateFlashcardsModal from "../components/GenerateFlashcardsModal";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadNotes from "../components/UploadNotes";
+import { deleteFlashcard } from "../services/flashcardService";
 
 const StudySetDetailPage = () => {
   const { studySetId } = useParams();
@@ -23,7 +24,8 @@ const StudySetDetailPage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [showManualFlashcard, setShowManualFlashcard] = useState(false);
-  const [showGenerateFlashcardsModal, setShowGenerateFlashcardsModal] = useState(false);
+  const [showGenerateFlashcardsModal, setShowGenerateFlashcardsModal] =
+    useState(false);
   const navigate = useNavigate();
   const [lastSessionResults, setLastSessionResults] = useState(null);
 
@@ -176,75 +178,82 @@ const StudySetDetailPage = () => {
     });
   };
 
+  const handleDeleteFlashcard = async (flashcardId) => {
+    try {
+      await deleteFlashcard();
+      setFlashcards(
+        flashcards.filter((flashcard) => flashcard._id !== flashcardId)
+      );
+    } catch (error) {
+      console.error("Error deleting flashcard:", error);
+      alert("Failed to delete flashcard");
+    }
+  };
+
   return (
     <div className="overlay">
       <Nav />
       <div className="study-set-detail-page">
-        <h2>{studySetName}</h2>
-
-        {/* Display last session results if available */}
-        {lastSessionResults && (
-          <div className="last-session-results">
-            <strong>Last Session:</strong> {lastSessionResults.correctCount} out of{" "}
-            {lastSessionResults.totalCount} correct
-          </div>
-        )}
+        <div className="study-set-name">
+          <h2>{studySetName}</h2>
+          {lastSessionResults && (
+            <div className="last-session-results">
+              <strong>Last Session:</strong> {lastSessionResults.correctCount}{" "}
+              out of {lastSessionResults.totalCount} correct
+            </div>
+          )}
+        </div>
 
         {flashcards.length > 0 ? (
           <>
             <FlashcardList
               flashcards={flashcards}
               handleCardClick={handleCardClick}
+              editMode={editMode}
+              handleDeleteFlashcard={handleDeleteFlashcard}
             />
-            <button className="get-started-btn" onClick={toggleEditMode}>
-              {editMode ? "Cancel Edit" : "Edit"}
-            </button>
-            <div>
-              <button onClick={handleStartSession} className="btn">
-                Start a Session
-              </button>
-            </div>
           </>
         ) : (
           <p>
-            You have not added any flashcards to {studySetName} yet. Please select an option below to generate flashcards!
+            You have not added any flashcards to {studySetName} yet. Please
+            select an option to generate flashcards!
           </p>
         )}
 
-        <button className="btn" onClick={toggleManualFlashcard}>
-          {showManualFlashcard ? "Cancel" : "Create Flashcard Manually"}
-        </button>
+        <div className="study-set-options">
+          <button className="get-started-btn" onClick={toggleEditMode}>
+            {editMode ? "Cancel Edit" : "Edit"}
+          </button>
 
-        <button className="btn" onClick={toggleGenerateFlashcardsModal}>
-          {showGenerateFlashcardsModal ? "Cancel" : "Generate Flashcards"}
-        </button>
+          <button onClick={handleStartSession} className="btn">
+            Start a Session
+          </button>
 
-        {showManualFlashcard && (
-          <Modal onClose={toggleManualFlashcard}>
-            <ManualFlashcard
+          <button className="btn" onClick={toggleManualFlashcard}>
+            {showManualFlashcard ? "Cancel" : "Create Flashcard Manually"}
+          </button>
+
+          <button className="btn" onClick={toggleGenerateFlashcardsModal}>
+            {showGenerateFlashcardsModal ? "Cancel" : "Generate Flashcards"}
+          </button>
+
+          {showManualFlashcard && (
+            <Modal onClose={toggleManualFlashcard}>
+              <ManualFlashcard
+                userInfo={userInfo}
+                onSave={handleManualFlashcardSave}
+              />
+            </Modal>
+          )}
+
+          {showGenerateFlashcardsModal && (
+            <GenerateFlashcardsModal
+              onClose={toggleGenerateFlashcardsModal}
               userInfo={userInfo}
-              onSave={handleManualFlashcardSave}
+              onFlashcardsGenerated={handleFlashcardsGenerated}
             />
-          </Modal>
-        )}
-
-        {showGenerateFlashcardsModal && (
-          <GenerateFlashcardsModal
-            onClose={toggleGenerateFlashcardsModal}
-            userInfo={userInfo}
-            onFlashcardsGenerated={handleFlashcardsGenerated} 
-          />
-        )}
-
-        {editMode && (
-          <div className="edit-container">
-            <UploadNotes
-              notes={notes}
-              setNotes={setNotes}
-              setFlashcards={setFlashcards}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

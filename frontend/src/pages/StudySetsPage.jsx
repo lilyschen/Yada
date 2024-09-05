@@ -66,12 +66,6 @@ const StudySetsPage = () => {
           handleCreateStudySet={handleCreateStudySet}
           userInfo={userInfo}
         />
-
-        {/* <div>
-          <button onClick={() => navigate("/upload")} className="btn">
-            Go to Upload Page
-          </button>
-        </div> */}
       </div>
     </div>
   );

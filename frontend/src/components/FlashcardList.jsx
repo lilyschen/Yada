@@ -3,6 +3,8 @@ import React from "react";
 const FlashcardList = ({
   flashcards,
   handleCardClick,
+  editMode,
+  handleDeleteFlashcard,
   handleSaveFlashcard,
 }) => {
   return (
@@ -25,6 +27,18 @@ const FlashcardList = ({
               </>
             )}
           </p>
+          {/* Conditionally render the delete button in edit mode */}
+          {editMode && (
+            <button
+              className="delete-btn"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering handleCardClick
+                handleDeleteFlashcard(flashcard._id); // Call the delete handler
+              }}
+            >
+              <img className="delete-img" src="/bin.png" />
+            </button>
+          )}
           {/* <button
             className="save-btn"
             onClick={(e) => {
