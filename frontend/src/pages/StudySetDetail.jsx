@@ -180,7 +180,7 @@ const StudySetDetailPage = () => {
 
   const handleDeleteFlashcard = async (flashcardId) => {
     try {
-      await deleteFlashcard( flashcardId, userInfo );
+      await deleteFlashcard(flashcardId, userInfo);
       setFlashcards(
         flashcards.filter((flashcard) => flashcard._id !== flashcardId)
       );
@@ -222,7 +222,7 @@ const StudySetDetailPage = () => {
 
         <div className="study-set-options">
           <button className="get-started-btn" onClick={toggleEditMode}>
-            {editMode ? "Cancel Edit" : "Edit"}
+            {editMode ? "Done Editing" : "Edit"}
           </button>
 
           <button onClick={handleStartSession} className="btn">
