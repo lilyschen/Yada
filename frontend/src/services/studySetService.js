@@ -200,3 +200,27 @@ export const fetchFlashcardsInStudySet = async (studySetId) => {
       throw error;
     }
   };
+
+// Example for updating the study set name
+export const updateStudySetName = async (studySetId, newName, userInfo) => {
+    try {
+        const response = await fetch("http://localhost:3000/update-study-set-name", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ studySetId, newName, user: userInfo }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating study set name:", error);
+        throw error;
+    }
+};
+
