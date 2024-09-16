@@ -46,6 +46,19 @@ To set up the project locally, follow these steps:
 
 6. **Run the frontend server**
 
+#### **backend env file setup**
+````
+OPENAI_API_KEY=''
+PORT=3000
+
+AUTH0_SECRET=''
+BASE_URL='http://localhost:3000'
+AUTH0_CLIENT_ID=''
+AUTH0_ISSUER_BASE_URL=''
+
+MONGODB_URI=''
+````
+
 ## **Getting Started**
 
 1. **Access the Application:**

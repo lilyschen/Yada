@@ -28,74 +28,91 @@ exports.generateFlashcards = async (req) => {
     }
 
     // Mocking OpenAI API response
-    const mockResponse = {
-      choices: [
-        {
-          text: "Question 1 What is the capital of France?\nAnswer Paris\nQuestion 2 What is the largest planet?\nAnswer Jupiter",
-        },
-      ],
-    };
+    // const mockResponse = {
+    //   choices: [
+    //     {
+    //       text: "Question 1 What is the capital of France?\nAnswer Paris\nQuestion 2 What is the largest planet?\nAnswer Jupiter",
+    //     },
+    //   ],
+    // };
 
-    const flashcards = mockResponse.choices[0].text
-      .trim()
-      .split("\n")
-      .reduce((acc, line) => {
-        if (line.startsWith("Q:") || line.startsWith("Question")) {
-          acc.push({
-            question: line.slice(line.startsWith("Q:") ? 3 : 10).trim(),
-            answer: "",
-            showAnswer: false,
-          });
-        } else if (
-          (line.startsWith("A:") || line.startsWith("Answer")) &&
-          acc.length > 0
-        ) {
-          acc[acc.length - 1].answer = line
-            .slice(line.startsWith("A:") ? 3 : 7)
-            .trim();
-        }
-        return acc;
-      }, []);
+    // const flashcards = mockResponse.choices[0].text
+    //   .trim()
+    //   .split("\n")
+    //   .reduce((acc, line) => {
+    //     if (line.startsWith("Q:") || line.startsWith("Question")) {
+    //       acc.push({
+    //         question: line.slice(line.startsWith("Q:") ? 3 : 10).trim(),
+    //         answer: "",
+    //         showAnswer: false,
+    //       });
+    //     } else if (
+    //       (line.startsWith("A:") || line.startsWith("Answer")) &&
+    //       acc.length > 0
+    //     ) {
+    //       acc[acc.length - 1].answer = line
+    //         .slice(line.startsWith("A:") ? 3 : 7)
+    //         .trim();
+    //     }
+    //     return acc;
+    //   }, []);
+    //
+    // if (flashcards.length === 0) {
+    //   console.log("No flashcards generated."); // Log 6
+    //   return { flashcards }; // Return an empty array
+    // }
 
-    if (flashcards.length === 0) {
-      console.log("No flashcards generated."); // Log 6
-      return { flashcards }; // Return an empty array
-    }
+    const response = await openaiClient.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+            { role: 'system', content: 'Generate flashcards from the following notes:' },
+            { role: 'user', content: notes },
+            { role: 'system', content: 'You are a helpful assistant.' },
+            {
+                role: 'user',
+                content: `Generate question and answer flashcards from the following notes.
+                          Please include a mix of true/false, fill-in-the-blank, and multiple-choice questions.
+                          Format each flashcard as "Q: [Question]" and "A: [Answer]".
+                          Here are the notes:\n${notes}`
+            }
+        ],
+        max_tokens: 150,
+    });
 
-    // const response = await openaiClient.chat.completions.create({
-    //     model: 'gpt-4',
-    //     messages: [
-    //         { role: 'system', content: 'Generate flashcards from the following notes:' },
-    //         { role: 'user', content: notes },
-    //         { role: 'system', content: 'You are a helpful assistant.' },
-    //         {
-    //             role: 'user',
-    //             content: `Generate question and answer flashcards from the following notes.
-    //                       Please include a mix of true/false, fill-in-the-blank, and multiple-choice questions.
-    //                       Format each flashcard as "Q: [Question]" and "A: [Answer]".
-    //                       Here are the notes:\n${notes}`
-    //         }
-    //     ],
-    //     max_tokens: 150,
-    // });
-
-    // console.log('OpenAI API response received'); // Log 7
+    console.log('OpenAI API response received'); // Log 7
+    console.log('OpenAI API response:', response.choices[0].message.content);
     // const flashcards = response.choices[0].message.content.trim().split('\n').map(line => {
     //     const [question, answer] = line.split(':');
     //     return { question, answer, showAnswer: false };
     // });
 
-    // const flashcards = response.choices[0].message.content.trim().split('\n').reduce((acc, line, index, arr) => {
-    //     if (line.startsWith('Q:')) {
-    //         acc.push({ question: line.slice(3).trim(), answer: '', showAnswer: false });
-    //     } else if (line.startsWith('A:') && acc.length > 0) {
-    //         acc[acc.length - 1].answer = line.slice(3).trim();
-    //     }
-    //     return acc;
-    // }, []);
+    const flashcards = response.choices[0].message.content.trim().split('\n').reduce((acc, line, index, arr) => {
+        if (line.startsWith('Q:')) {
+            acc.push({ question: line.slice(3).trim(), answer: '', showAnswer: false });
+        } else if (line.startsWith('A:') && acc.length > 0) {
+            acc[acc.length - 1].answer = line.slice(3).trim();
+        }
+        return acc;
+    }, []);
+
+    console.log("Parsed flashcards:", flashcards);
+
+    // Filter out flashcards with missing answers
+    const validFlashcards = flashcards.filter(flashcard => flashcard.answer.trim() !== '');
+
+    if (validFlashcards.length === 0) {
+      console.log("No valid flashcards generated."); // Log 7
+      return { flashcards: validFlashcards }; // Return an empty array
+    }
+
+
+    // if (flashcards.length === 0) {
+    //   console.log("No flashcards generated."); // Log 6
+    //   return { flashcards }; // Return an empty array
+    // }
 
     // Save each generated flashcard to the database
-    for (const flashcard of flashcards) {
+    for (const flashcard of validFlashcards) {
       try {
         const userId = req.body.user ? req.body.user.sub : "defaultUser";
         const userEmail = req.body.user ? req.body.user.email : "defaultEmail";
@@ -116,7 +133,7 @@ exports.generateFlashcards = async (req) => {
       }
     }
 
-    return { flashcards };
+    return { flashcards: validFlashcards };
   } catch (error) {
     console.error("Error generating flashcards:", error); // Log 9
     return { error: "Error generating flashcards" };
