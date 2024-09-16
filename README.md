@@ -29,6 +29,7 @@ Yada is an innovative study tool designed to transform course notes into interac
 - **Backend:** Node.js
 - **Database:** MongoDB
 - **AI Integration:** OpenAI API
+- **Authentication:** Auth0
 
 ## **Installation**
 
@@ -40,7 +41,7 @@ To set up the project locally, follow these steps:
 
 3. **Install frontend dependencies**
 
-4. **Set up environment variables (MongoDB, OpenAI API)**
+4. **Set up environment variables (MongoDB, OpenAI API, Auth0)**
 
 5. **Run the backend server**
 
